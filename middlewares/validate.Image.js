@@ -1,5 +1,4 @@
 module.exports = (req, res, next) => {
-    // لو مفيش ملف، كمل عادي
     if (!req.file) return next();
 
     const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];

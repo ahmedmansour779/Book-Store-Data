@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken")
-const CustomError = require("../utils/customError");
+const jwt = require("jsonwebtoken");
+const CustomError = require("../utils/custom.error");
 
 const verifyToken = async (req, res, next) => {
     const authHeader = req.headers["authorization"] || req.headers["Authorization"]

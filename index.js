@@ -2,12 +2,15 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const path = require('path');
 const multer = require("multer");
 
-const routesCourses = require('./routes/courser.routes');
-const routesUsers = require('./routes/users.routes');
-const httpStatusText = require("./utils/httpStatusText");
+const routesBlogs = require('./routes/blog.routes');
+const routesUsers = require('./routes/auth.routes');
+const routesTerms = require('./routes/term.routes');
+const routesTestimonials = require('./routes/testimonials.routes');
+const routesPortfolio = require('./routes/portfolio.routes');
+
+const httpStatusText = require("./utils/http.status.text")
 
 const app = express();
 const url = process.env.MONGO_URL;
@@ -30,12 +33,12 @@ app.use(express.urlencoded({ extended: true }));
 // لقبول json
 app.use(express.json());
 
-// لعرض الصور المحلية
-app.use("/uploads", express.static(path.join(__dirname, 'uploads')));
-
 // -------------------- Routes --------------------
-app.use("/api/courses", routesCourses);
-app.use("/api/users", routesUsers);
+app.use("/api/blogs", routesBlogs);
+app.use("/api/auth", routesUsers);
+app.use("/api/terms", routesTerms);
+app.use("/api/testimonials", routesTestimonials);
+app.use("/api/portfolio", routesPortfolio);
 
 // -------------------- 404 Not Found --------------------
 app.use((req, res) => {
@@ -54,8 +57,6 @@ app.use((err, req, res, next) => {
             message: "Only one file is allowed"
         });
     }
-
-    console.error(err);
 
     res.status(err.statusCode || 500).json({
         status: httpStatusText.ERROR,

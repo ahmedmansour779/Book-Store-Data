@@ -1,7 +1,8 @@
 const userRole = {
     user: "user",
-    admin: "admin",
-    superAdmin: "super admin"
+    writer: "writer",
+    humanRelations: "human relations",
+    owner: "owner",
 }
 
 module.exports = userRole

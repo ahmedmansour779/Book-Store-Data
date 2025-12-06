@@ -1,5 +1,5 @@
 {
-  "name": "lecture-5",
+  "name": "cp-backend",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,9 +7,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon index.js"
   },
-  "engines": {
-  "node": ">=18"
-},
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -24,6 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^9.0.0",
     "multer": "^2.0.2",
+    "nodemailer": "^7.0.11",
     "validator": "^13.15.23"
   }
 }

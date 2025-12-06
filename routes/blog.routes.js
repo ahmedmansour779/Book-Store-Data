@@ -1,0 +1,25 @@
+let express = require('express')
+const { addOneBlog, getAllBlogs, getOneBlog, deleteOneBlog, updateBlog, updateItemInBlog } = require('../controllers/blog.controller')
+const { middlewarePostBlog } = require('../middlewares/blog.middleware')
+const multer = require("multer");
+const validateImage = require('../middlewares/validate.Image');
+const verifyToken = require('../middlewares/verify.token');
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+const router = express.Router()
+
+router.route("/")
+    .post(verifyToken, upload.single("image"), validateImage, addOneBlog)
+    .get(getAllBlogs)
+
+router.route("/:id")
+    .get(getOneBlog)
+    .delete(verifyToken, deleteOneBlog)
+    .patch(verifyToken, upload.single("image"), validateImage, updateBlog)
+
+router.route("/:blogId/items/:itemId")
+    .patch(upload.none(), verifyToken, updateItemInBlog)
+
+module.exports = router
