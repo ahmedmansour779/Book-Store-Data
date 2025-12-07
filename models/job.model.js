@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const blogSchema = new mongoose.Schema({
+const jobSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true
@@ -13,26 +13,23 @@ const blogSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    date: {
+    created: {
         type: String,
     },
-    category: {
+    updated: {
+        type: String,
+    },
+    employmentType: {
         type: String,
         required: true
     },
-    items: [{
-        type: {
-            title: String,
-            items: [String]
-        },
+    experience: {
+        type: String,
         required: true
-    }],
+    },
     author: {
         type: String,
-    },
-    editedBy: {
-        type: String,
-    },
+    }
 });
 
-module.exports = mongoose.model('Blog', blogSchema);
+module.exports = mongoose.model('Job', jobSchema);

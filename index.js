@@ -10,6 +10,7 @@ const routesTerms = require('./routes/term.routes');
 const routesTestimonials = require('./routes/testimonials.routes');
 const routesPortfolio = require('./routes/portfolio.routes');
 const routesContact = require('./routes/contact.routes');
+const routesJobs = require('./routes/jobs.routes');
 
 const httpStatusText = require("./utils/http.status.text")
 
@@ -41,6 +42,7 @@ app.use("/api/terms", routesTerms);
 app.use("/api/testimonials", routesTestimonials);
 app.use("/api/portfolio", routesPortfolio);
 app.use("/api/contact", routesContact);
+app.use("/api/jobs", routesJobs);
 
 // -------------------- 404 Not Found --------------------
 app.use((req, res) => {
