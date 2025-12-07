@@ -243,7 +243,7 @@ const editProfileData = asyncWrapper(async (req, res) => {
             });
         }
 
-        user.role = role
+        user.role = role || user.role
 
         await user.save();
         return res.status(200).json({
