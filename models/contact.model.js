@@ -1,20 +1,13 @@
 const mongoose = require("mongoose")
 const validator = require("validator");
-const userRole = require("../utils/user.roles");
-const favoriteContact = require("../utils/favorite.contact");
 
-const userSchema = new mongoose.Schema({
+const contactSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
     },
-    phone: {
+    companyName: {
         type: String,
-        required: true
-    },
-    whatsapp: {
-        type: String,
-        required: true
     },
     email: {
         type: String,
@@ -31,23 +24,18 @@ const userSchema = new mongoose.Schema({
             message: "Email must be a valid Gmail address without any dots before @"
         }
     },
-    password: {
+    phone: {
         type: String,
         required: true
     },
-    favoriteContact: {
+    subject: {
         type: String,
-        required: true,
-        enum: [favoriteContact.email, favoriteContact.phone, favoriteContact.whatsapp]
+        required: true
     },
-    companyName: {
+    massage: {
         type: String,
+        required: true
     },
-    role: {
-        type: String,
-        enum: [userRole.user, userRole.humanRelations, userRole.owner, userRole.writer],
-        default: userRole.user
-    }
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Contact', contactSchema);
