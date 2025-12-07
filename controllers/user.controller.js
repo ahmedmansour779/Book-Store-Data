@@ -182,7 +182,7 @@ const getOneUser = asyncWrapper(async (req, res) => {
 
 const editProfileData = asyncWrapper(async (req, res) => {
     const id = req.params.id;
-    const { password, role } = req.body
+    const { password, role, email, name, phone, whatsapp, favoriteContact, companyName } = req.body
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
         throw CustomError.create(400, "Invalid blog id");
@@ -194,30 +194,58 @@ const editProfileData = asyncWrapper(async (req, res) => {
         throw CustomError.create(404, "user not found");
     }
 
-    if (req.user.data.email == user.email) {
-        const hashingPassword = await bcryptjs.hash(password, 10)
-        user.password = hashingPassword
+    const isOwner = req.user.data.role === userRole.owner;
+    const isSameUser = req.user.data.email === user.email;
+
+    if (isSameUser) {
+        if (role && role !== user.role) {
+            return res.status(403).json({
+                status: httpStatusText.FAIL,
+                message: "You cannot change your role"
+            });
+        }
+
+        let hashedPassword = user.password;
+        if (password && password.trim() !== "") {
+            hashedPassword = await bcryptjs.hash(password, 10);
+        }
+
+        user.password = hashedPassword;
+        user.email = email || user.email;
+        user.name = name || user.name;
+        user.phone = phone || user.phone;
+        user.whatsapp = whatsapp || user.whatsapp;
+        user.favoriteContact = favoriteContact || user.favoriteContact;
+        user.companyName = companyName || user.companyName;
 
         await user.save();
-        return res.status(201).json({
+
+        return res.status(200).json({
             status: httpStatusText.SUCCESS,
             data: { user }
         });
     }
 
-    if (req.user.data.role == userRole.owner) {
+    if (isOwner) {
+        if (!role) {
+            return res.status(400).json({
+                status: httpStatusText.FAIL,
+                message: "Owner can only update the role field"
+            });
+        }
+
         user.role = role
 
         await user.save();
-        return res.status(201).json({
+        return res.status(200).json({
             status: httpStatusText.SUCCESS,
             data: { user }
         });
     }
 
-    res.status(400).json({
+    res.status(403).json({
         status: httpStatusText.FAIL,
-        message: "you can not edit"
+        message: "You do not have permission to edit this profile"
     });
 });
 
