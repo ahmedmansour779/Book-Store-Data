@@ -210,6 +210,15 @@ const editProfileData = asyncWrapper(async (req, res) => {
             hashedPassword = await bcryptjs.hash(password, 10);
         }
 
+        const emailExists = await Users.findOne({ email });
+
+        if (emailExists) {
+            return res.status(400).json({
+                status: httpStatusText.FAIL,
+                message: "Email already in use"
+            });
+        }
+
         user.password = hashedPassword;
         user.email = email || user.email;
         user.name = name || user.name;
