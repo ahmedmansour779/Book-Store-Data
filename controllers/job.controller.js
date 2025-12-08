@@ -7,6 +7,7 @@ const formatDate = require("../utils/format.date");
 const uploadImage = require("../utils/upload.Image");
 const mongoose = require("mongoose");
 const userRole = require("../utils/user.roles");
+const uploadPdf = require("../utils/upload.pdf");
 
 const addOneJob = asyncWrapper(async (req, res) => {
     const errors = validationResult(req);
@@ -54,6 +55,30 @@ const getAllJobs = asyncWrapper(async (req, res) => {
         ? { title: { $regex: search, $options: "i" } }
         : {};
 
+    if (req.user.data.role !== userRole.humanRelations) {
+        const jobs = await Jobs.find(filter, { "__v": false, applications: false, author: false })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await Jobs.countDocuments(filter);
+
+        if (jobs.length === 0) {
+            throw CustomError.create(404, "No jobs found");
+        }
+
+        res.status(200).json({
+            status: httpStatusText.SUCCESS,
+            data: {
+                jobs,
+                pagination: {
+                    total,
+                    page,
+                    limit,
+                    totalPages: Math.ceil(total / limit)
+                }
+            }
+        });
+    }
     const jobs = await Jobs.find(filter, { "__v": false })
         .skip(skip)
         .limit(limit);
@@ -165,10 +190,56 @@ const updateJob = asyncWrapper(async (req, res) => {
     });
 });
 
+const applyToJob = asyncWrapper(async (req, res) => {
+    const jobId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+        throw CustomError.create(400, "Invalid job id");
+    }
+
+    const job = await Jobs.findById(jobId);
+
+    if (!job) {
+        throw CustomError.create(404, "Job not found");
+    }
+
+    let cv;
+    if (req.file) {
+        cv = await uploadPdf(req.file, "CVs", req.body.fullName);
+    }
+
+    if (!cv) {
+        throw CustomError.create(400, "CV (pdf file) is required");
+    }
+
+    const application = {
+        fullName: req.body.fullName,
+        country: req.body.country,
+        state: req.body.state,
+        gender: req.body.gender,
+        email: req.body.email,
+        phone: req.body.phone,
+        cv: cv,
+        message: req.body.message || ""
+    };
+
+    job.applications.push(application);
+
+    await job.save();
+
+    res.status(201).json({
+        status: httpStatusText.SUCCESS,
+        message: "Application submitted successfully",
+        data: { application }
+    });
+});
+
+
 module.exports = {
     addOneJob,
     getAllJobs,
     getOneJob,
     deleteOneJob,
-    updateJob
+    updateJob,
+    applyToJob
 };

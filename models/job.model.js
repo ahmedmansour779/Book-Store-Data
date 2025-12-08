@@ -1,5 +1,45 @@
 const mongoose = require("mongoose")
 
+const applicationSchema = new mongoose.Schema({
+    fullName: {
+        type: String,
+        required: true
+    },
+    country: {
+        type: String,
+        required: true
+    },
+    state: {
+        type: String,
+        required: true
+    },
+    gender: {
+        type: String,
+        required: true,
+        enum: ["male", "female", "other"]
+    },
+    email: {
+        type: String,
+        required: true
+    },
+    phone: {
+        type: String,
+        required: true
+    },
+    cv: {
+        type: String,
+        required: true
+    },
+    message: {
+        type: String,
+        required: false
+    },
+    appliedAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+
 const jobSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -29,6 +69,10 @@ const jobSchema = new mongoose.Schema({
     },
     author: {
         type: String,
+    },
+    applications: {
+        type: [applicationSchema],
+        default: []
     }
 });
 
