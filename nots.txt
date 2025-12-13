@@ -1,0 +1,9 @@
+applications:
+    - fullName
+    - country
+    - state
+    - gender
+    - email
+    - phone
+    - cv
+    - massage (un require)

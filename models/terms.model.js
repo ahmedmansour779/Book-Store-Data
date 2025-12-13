@@ -1,19 +1,21 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose');
 
 const termsSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true
+  title: {
+    type: String,
+    required: true,
+  },
+  items: [
+    {
+      type: [String],
+      required: true,
     },
-    items: [{
-        type: [String],
-        required: true
-    }],
+  ],
+  created: {
     created: {
-        created: {
-            type: String
-        }
-    }
+      type: String,
+    },
+  },
 });
 
 module.exports = mongoose.model('Term', termsSchema);

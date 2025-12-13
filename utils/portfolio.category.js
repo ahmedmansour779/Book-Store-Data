@@ -1,7 +1,7 @@
 const portfolioCategory = {
-    print: "print",
-    designProgramming: "Design and programming",
-    marketing: "marketing",
-}
+  print: 'print',
+  designProgramming: 'Design and programming',
+  marketing: 'marketing',
+};
 
-module.exports = portfolioCategory
+module.exports = portfolioCategory;

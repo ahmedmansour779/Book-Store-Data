@@ -1,7 +1,7 @@
 const favoriteContact = {
-    phone: "phone",
-    whatsapp: "whatsapp",
-    email: "email",
-}
+  phone: 'phone',
+  whatsapp: 'whatsapp',
+  email: 'email',
+};
 
-module.exports = favoriteContact
+module.exports = favoriteContact;
