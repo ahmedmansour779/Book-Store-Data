@@ -13,9 +13,10 @@ const routesContact = require('./routes/contact.routes');
 const routesJobs = require('./routes/jobs.routes');
 const routesStandardService = require('./routes/standardService.routes');
 const routesCustomServices = require('./routes/customServices.routes');
-
+const PaymentRoutes = require('./routes/payment.route.js');
 const httpStatusText = require('./utils/http.status.text');
-
+const uploadRoutes = require('./routes/upload.routes.js');
+const adminRoutes = require('./routes/admin.routes.js');
 const app = express();
 const url = process.env.MONGO_URL;
 
@@ -29,13 +30,10 @@ mongoose
 
 // -------------------- Middlewares --------------------
 
-// أي port يسمح بالـ requests
 app.use(cors());
 
-// لقبول form data
 app.use(express.urlencoded({ extended: true }));
 
-// لقبول json
 app.use(express.json());
 
 // -------------------- Routes --------------------
@@ -48,6 +46,9 @@ app.use('/api/contact', routesContact);
 app.use('/api/jobs', routesJobs);
 app.use('/api/standard-service', routesStandardService);
 app.use('/api/custom-services', routesCustomServices);
+app.use('/api/payment', PaymentRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/admin', adminRoutes);
 
 // -------------------- 404 Not Found --------------------
 app.use((req, res) => {
@@ -58,8 +59,8 @@ app.use((req, res) => {
 });
 
 // -------------------- Error Handler --------------------
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  // التعامل مع MulterError لما حد يرفع أكتر من ملف
   if (err instanceof multer.MulterError && err.code === 'LIMIT_UNEXPECTED_FILE') {
     return res.status(400).json({
       status: 'fail',
