@@ -2,7 +2,7 @@ const userRole = {
   user: 'user',
   writer: 'writer',
   humanRelations: 'human relations',
-  owner: 'owner',
+  admin: 'admin',
 };
 
 module.exports = userRole;

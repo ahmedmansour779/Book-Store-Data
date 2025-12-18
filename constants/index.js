@@ -13,4 +13,16 @@ const adminMessages = {
   dataFetched: 'تم جلب البيانات بنجاح',
 };
 
-module.exports = { adminMessages };
+const blogsMessages = {
+  notAddAccessibility: 'لا يمكنك إضافة مقالة',
+  blogAddSuccess: 'تم اضافة المقالة بنجاح',
+  notBlogsFound: 'لا توجد مقالات',
+  invalidBlogId: 'معرف المقالة غير صالح',
+  blogNotFound: 'المقالة غير موجودة',
+  notDeleteAccessibility: 'لا يمكنك حذف هذه المقالة',
+  deleteSuccess: 'تم حذف المقالة بنجاح',
+  notUpdataAccessibility: 'لا يمكنك تعديل هذه المقالة',
+  updateSuccess: 'تم تعديل المقالة بنجاح',
+};
+
+module.exports = { adminMessages, blogsMessages };

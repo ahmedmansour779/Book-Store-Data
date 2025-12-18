@@ -27,10 +27,10 @@ const getAdminData = asyncWrapper(async (req, res, next) => {
 });
 
 const adminRegister = asyncWrapper(async (req, res, next) => {
-  const { name, phone, email, password } = req.body;
+  const { name, phone, email, password, role } = req.body;
 
   try {
-    await adminSchema.validate({ name, phone, email, password }, { abortEarly: false });
+    await adminSchema.validate({ name, phone, email, password, role }, { abortEarly: false });
   } catch (error) {
     const validationErrors = error.errors.join(', ');
     return next(new AppError(validationErrors, 400, httpStatusText.FAIL));
@@ -47,6 +47,7 @@ const adminRegister = asyncWrapper(async (req, res, next) => {
     name,
     phone,
     email,
+    role,
     password: hashingPassword,
   });
 
@@ -87,6 +88,7 @@ const adminLogin = asyncWrapper(async (req, res, next) => {
   const payload = {
     id: admin._id,
     email: admin.email,
+    role: admin.role,
   };
 
   const token = await generateToken(payload, '7d');
