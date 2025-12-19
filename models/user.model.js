@@ -1,53 +1,57 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const userRole = require('../utils/user.roles');
 const favoriteContact = require('../utils/favorite.contact');
+const { userMessages } = require('../constants');
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  phone: {
-    type: String,
-    required: true,
-  },
-  whatsapp: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    validate: {
-      validator: function (v) {
-        const isGmail = validator.isEmail(v) && v.toLowerCase().endsWith('@gmail.com');
-        if (!isGmail) return false;
-        const localPart = v.split('@')[0];
-        const hasDot = localPart.includes('.');
-        return !hasDot;
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, userMessages.nameRequired],
+      trim: true,
+    },
+    phone: {
+      type: String,
+      required: [true, userMessages.phoneRequired],
+    },
+    whatsapp: {
+      type: String,
+      required: [true, userMessages.whatsappRequired],
+    },
+    email: {
+      type: String,
+      required: [true, userMessages.emailRequired],
+      unique: true,
+      validate: {
+        validator: function (v) {
+          const isGmail = validator.isEmail(v) && v.toLowerCase().endsWith('@gmail.com');
+          if (!isGmail) return false;
+          const localPart = v.split('@')[0];
+          return !localPart.includes('.');
+        },
+        message: userMessages.emailInvalid,
       },
-      message: 'Email must be a valid Gmail address without any dots before @',
+    },
+    password: {
+      type: String,
+      required: [true, userMessages.passwordRequired],
+      minlength: [8, userMessages.passwordMinLength],
+    },
+    favoriteContact: {
+      type: String,
+      required: [true, userMessages.favoriteContactRequired],
+      enum: {
+        values: [favoriteContact.email, favoriteContact.phone, favoriteContact.whatsapp],
+        message: userMessages.favoriteContactInvalid,
+      },
+    },
+    companyName: {
+      type: String,
     },
   },
-  password: {
-    type: String,
-    required: true,
-  },
-  favoriteContact: {
-    type: String,
-    required: true,
-    enum: [favoriteContact.email, favoriteContact.phone, favoriteContact.whatsapp],
-  },
-  companyName: {
-    type: String,
-  },
-  role: {
-    type: String,
-    enum: [userRole.user, userRole.humanRelations, userRole.owner, userRole.writer],
-    default: userRole.user,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 module.exports = mongoose.model('User', userSchema);

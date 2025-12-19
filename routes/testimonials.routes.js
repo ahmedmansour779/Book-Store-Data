@@ -15,10 +15,7 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 const router = express.Router();
 
-router
-  .route('/')
-  .post(verifyToken, upload.single('image'), validateImage, addOneTestimonials)
-  .get(getAllTestimonials);
+router.route('/').post(verifyToken, upload.none(), addOneTestimonials).get(getAllTestimonials);
 
 router
   .route('/:id')

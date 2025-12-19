@@ -3,7 +3,7 @@ const httpStatusText = require('../utils/http.status.text');
 const Admin = require('../models/admin.model');
 const bcryptjs = require('bcryptjs');
 const generateToken = require('../utils/generate.token');
-const adminSchema = require('../utils/validation/registerAdminSchema');
+const { adminSchema, passwordSchema } = require('../utils/validation/registerAdminSchema');
 const loginSchema = require('../utils/validation/loginAdminSchema');
 const forgotPasswordSchema = require('../utils/validation/forgotPasswordSchema');
 const verifyOTPSchema = require('../utils/validation/verifyOTPSchema');
@@ -175,10 +175,42 @@ const verifyOTP = asyncWrapper(async (req, res, next) => {
   });
 });
 
+const resetPasswordAdmin = asyncWrapper(async (req, res, next) => {
+  const { email, id, password } = req.body;
+
+  try {
+    await passwordSchema.validate({ password }, { abortEarly: false });
+  } catch (error) {
+    return next(new AppError(error.errors.join(', '), 400, httpStatusText.FAIL));
+  }
+
+  if (email === req.user.email && id === req.user.id) {
+    const admin = await Admin.findById(req.user.id);
+    if (!admin) {
+      return next(new AppError('البريد الإلكتروني غير موجود', 404, httpStatusText.FAIL));
+    }
+
+    const hashingPassword = await bcryptjs.hash(password, 10);
+    admin.password = hashingPassword;
+    await admin.save();
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      message: adminMessages.resetPasswordSuccess,
+    });
+  }
+
+  return res.status(400).json({
+    status: httpStatusText.FAIL,
+    message: adminMessages.resetPasswordFail,
+  });
+});
+
 module.exports = {
   adminRegister,
   adminLogin,
   getAdminData,
   adminForgotPassword,
   verifyOTP,
+  resetPasswordAdmin,
 };

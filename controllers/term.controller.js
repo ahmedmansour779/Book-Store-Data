@@ -1,11 +1,12 @@
+/* eslint-disable no-unused-vars */
 const { validationResult } = require('express-validator');
 const CustomError = require('../utils/custom.error');
 const Terms = require('../models/terms.model');
 const asyncWrapper = require('../middlewares/async.wrapper');
-const formatDate = require('../utils/format.date');
 const httpStatusText = require('../utils/http.status.text');
 const { default: mongoose } = require('mongoose');
 const userRole = require('../utils/user.roles');
+const { termsMessages } = require('../constants');
 
 const addOneTerm = asyncWrapper(async (req, res) => {
   const errors = validationResult(req);
@@ -13,26 +14,26 @@ const addOneTerm = asyncWrapper(async (req, res) => {
     throw CustomError.create(400, errors.errors[0].msg);
   }
 
-  if (req.user.data.role !== userRole.owner) {
-    throw CustomError.create(400, 'you can not add terms');
+  const { items, title } = req.body;
+
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, termsMessages.notAddAccessibility);
   }
 
-  if (!req.body.date) {
-    req.body.created = formatDate();
+  let itemsData = JSON.parse(items);
+  if (!Array.isArray(itemsData)) {
+    throw CustomError.create(400, termsMessages.mustBeArray);
   }
 
-  let items = JSON.parse(req.body.items);
-  if (!Array.isArray(items)) {
-    throw CustomError.create(400, 'items must be a valid JSON array of strings');
-  }
-
-  req.body.items = items;
-
-  const terms = await Terms.create(req.body);
+  const terms = await Terms.create({
+    title,
+    items: itemsData,
+  });
 
   res.status(201).json({
     status: httpStatusText.SUCCESS,
     data: { terms },
+    message: termsMessages.addSuccess,
   });
 });
 
@@ -49,7 +50,7 @@ const getAllTerms = asyncWrapper(async (req, res) => {
   const total = await Terms.countDocuments(filter);
 
   if (terms.length === 0) {
-    throw CustomError.create(404, 'No terms found');
+    throw CustomError.create(404, termsMessages.notFound);
   }
 
   res.status(200).json({
@@ -70,13 +71,13 @@ const getOneTerm = asyncWrapper(async (req, res) => {
   const id = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw CustomError.create(400, 'Invalid term id');
+    throw CustomError.create(400, termsMessages.invalidId);
   }
 
   const term = await Terms.findById(id, { __v: false });
 
   if (!term) {
-    throw CustomError.create(404, 'term not found');
+    throw CustomError.create(404, termsMessages.notFound);
   }
 
   res.status(200).json({
@@ -93,63 +94,63 @@ const updateTerm = asyncWrapper(async (req, res) => {
     throw CustomError.create(400, errors.errors[0].msg);
   }
 
-  if (!mongoose.Types.ObjectId.isValid(req.user.data._id)) {
-    throw CustomError.create(400, 'Invalid term id');
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw CustomError.create(400, termsMessages.invalidId);
   }
 
   const term = await Terms.findById(id);
   if (!term) {
-    throw CustomError.create(404, 'term not found');
+    throw CustomError.create(404, termsMessages.notFound);
   }
 
-  if (req.user.data.role !== userRole.owner) {
-    throw CustomError.create(400, 'you can not update this term');
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, termsMessages.notEditAccessibility);
   }
 
   if (req.body.items) {
     if (typeof req.body.items === 'string') {
       try {
-        req.body.items = JSON.parse(req.body.items);
+        term.items = JSON.parse(req.body.items);
       } catch (err) {
-        throw CustomError.create(400, 'items must be a valid JSON array');
+        throw CustomError.create(400, termsMessages.mustBeArray);
       }
     }
   } else {
     req.body.items = term.items || [];
   }
 
-  Object.keys(req.body).forEach((key) => {
-    term[key] = req.body[key];
-  });
+  term.title = req.body.title || term.title;
 
   await term.save();
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: { term },
+    message: termsMessages.editSuccess,
   });
 });
 
 const deleteOneTerm = asyncWrapper(async (req, res) => {
-  if (req.user.data.role !== userRole.owner) {
-    throw CustomError.create(400, 'you can not delete term');
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, termsMessages.notEditAccessibility);
   }
 
   const id = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw CustomError.create(400, 'Invalid term id');
+    throw CustomError.create(400, termsMessages.invalidId);
   }
 
   const result = await Terms.deleteOne({ _id: id });
 
   if (result.deletedCount === 0) {
-    throw CustomError.create(404, 'term not found');
+    throw CustomError.create(404, termsMessages.notFound);
   }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: null,
+    message: termsMessages.deleteSuccess,
   });
 });
 

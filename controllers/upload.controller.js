@@ -2,6 +2,7 @@ const asyncWrapper = require('../middlewares/async.wrapper');
 const httpStatusText = require('../utils/http.status.text');
 const uploadImage = require('../utils/upload.Image');
 const AppError = require('../utils/app.error');
+const uploadPdf = require('../utils/upload.pdf');
 
 const uploadImageMethod = asyncWrapper(async (req, res, next) => {
   if (!req.file) {
@@ -28,4 +29,33 @@ const uploadImageMethod = asyncWrapper(async (req, res, next) => {
   });
 });
 
-module.exports = uploadImageMethod;
+const uploadFileMethod = asyncWrapper(async (req, res, next) => {
+  if (!req.file) {
+    return next(new AppError('لم يتم إرفاق ملف', 400));
+  }
+
+  if (req.file.mimetype !== 'application/pdf') {
+    return next(new AppError('يجب رفع ملف PDF فقط', 400));
+  }
+
+  const maxSize = 5 * 1024 * 1024;
+  if (req.file.size > maxSize) {
+    return next(new AppError('حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت', 400));
+  }
+
+  const pdfUrl = await uploadPdf(req.file, 'file');
+
+  if (!pdfUrl) {
+    return next(new AppError('فشل رفع الملف. يرجى المحاولة مرة أخرى', 500));
+  }
+
+  req.body.file = pdfUrl;
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: { file: pdfUrl },
+    message: 'تم رفع الملف بنجاح',
+  });
+});
+
+module.exports = { uploadImageMethod, uploadFileMethod };

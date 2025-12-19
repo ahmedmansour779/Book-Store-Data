@@ -2,11 +2,10 @@ const { validationResult } = require('express-validator');
 const asyncWrapper = require('../middlewares/async.wrapper');
 const CustomError = require('../utils/custom.error');
 const userRole = require('../utils/user.roles');
-const uploadImage = require('../utils/upload.Image');
-const formatDate = require('../utils/format.date');
 const Testimonials = require('../models/testimonials.model');
 const httpStatusText = require('../utils/http.status.text');
 const { default: mongoose } = require('mongoose');
+const { testimonialsMessages } = require('../constants');
 
 const addOneTestimonials = asyncWrapper(async (req, res) => {
   const errors = validationResult(req);
@@ -14,29 +13,24 @@ const addOneTestimonials = asyncWrapper(async (req, res) => {
     throw CustomError.create(400, errors.errors[0].msg);
   }
 
-  if (req.user.data.role !== userRole.owner) {
-    throw CustomError.create(400, 'you can not add Testimonials');
+  const { title, description, jobDescription, rating, image } = req.body;
+
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, testimonialsMessages.notAddAccessibility);
   }
 
-  let image;
-  if (req.file) {
-    image = await uploadImage(req.file, 'testimonials', req.body.title);
-    req.body.image = image;
-  }
-
-  if (!req.body.image) {
-    throw CustomError.create(400, 'image is required');
-  }
-
-  if (!req.body.created) {
-    req.body.created = formatDate();
-  }
-
-  const testimonial = await Testimonials.create(req.body);
+  const testimonial = await Testimonials.create({
+    title,
+    description,
+    jobDescription,
+    rating,
+    image,
+  });
 
   res.status(201).json({
     status: httpStatusText.SUCCESS,
     data: { testimonial },
+    message: testimonialsMessages.addSuccess,
   });
 });
 
@@ -53,7 +47,7 @@ const getAllTestimonials = asyncWrapper(async (req, res) => {
   const total = await Testimonials.countDocuments(filter);
 
   if (testimonials.length === 0) {
-    throw CustomError.create(404, 'No testimonials found');
+    throw CustomError.create(404, testimonialsMessages.notFound);
   }
 
   res.status(200).json({
@@ -74,13 +68,13 @@ const getOneTestimonial = asyncWrapper(async (req, res) => {
   const id = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw CustomError.create(400, 'Invalid Testimonials id');
+    throw CustomError.create(400, testimonialsMessages.invalidId);
   }
 
   const testimonial = await Testimonials.findById(id, { __v: false });
 
   if (!testimonial) {
-    throw CustomError.create(404, 'testimonial not found');
+    throw CustomError.create(404, testimonialsMessages.notFound);
   }
 
   res.status(200).json({
@@ -97,18 +91,17 @@ const updateTestimonial = asyncWrapper(async (req, res) => {
     throw CustomError.create(400, errors.errors[0].msg);
   }
 
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, testimonialsMessages.notEditAccessibility);
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw CustomError.create(400, testimonialsMessages.invalidId);
+  }
+
   const testimonial = await Testimonials.findById(id);
   if (!testimonial) {
-    throw CustomError.create(404, 'Testimonial not found');
-  }
-
-  if (req.user.data.role !== userRole.owner) {
-    throw CustomError.create(400, 'you can not update this Testimonial');
-  }
-
-  if (req.file) {
-    const image = await uploadImage(req.file, 'testimonials', req.body.title || blog.title);
-    req.body.image = image;
+    throw CustomError.create(404, testimonialsMessages.notFound);
   }
 
   Object.keys(req.body).forEach((key) => {
@@ -122,29 +115,31 @@ const updateTestimonial = asyncWrapper(async (req, res) => {
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: { testimonial },
+    message: testimonialsMessages.editSuccess,
   });
 });
 
 const deleteOneTestimonial = asyncWrapper(async (req, res) => {
-  if (req.user.data.role !== userRole.owner) {
-    throw CustomError.create(400, 'you can not delete Testimonial');
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, testimonialsMessages.notDeleteAccessibility);
   }
 
   const id = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw CustomError.create(400, 'Invalid Testimonial id');
+    throw CustomError.create(400, testimonialsMessages.invalidId);
   }
 
   const result = await Testimonials.deleteOne({ _id: id });
 
   if (result.deletedCount === 0) {
-    throw CustomError.create(404, 'Testimonial not found');
+    throw CustomError.create(404, testimonialsMessages.notFound);
   }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: null,
+    message: testimonialsMessages.deleteSuccess,
   });
 });
 

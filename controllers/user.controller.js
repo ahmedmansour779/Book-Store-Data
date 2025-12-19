@@ -9,6 +9,9 @@ const { sendOTP } = require('../utils/sendOTP');
 const OTP = require('../models/otp.model');
 const { default: mongoose } = require('mongoose');
 const userRole = require('../utils/user.roles');
+const { userMessages } = require('../constants');
+const { passwordSchema } = require('../utils/validation/registerAdminSchema');
+const AppError = require('../utils/app.error');
 
 const register = asyncWrapper(async (req, res) => {
   const errors = validationResult(req);
@@ -21,12 +24,12 @@ const register = asyncWrapper(async (req, res) => {
   const oldUser = await Users.findOne({ email });
 
   if (oldUser) {
-    throw CustomError.create(400, 'email is exist');
+    throw CustomError.create(400, userMessages.emailExists);
   }
 
   const hashingPassword = await bcryptjs.hash(password, 10);
 
-  const user = new Users({
+  const user = await Users.create({
     email,
     name,
     phone,
@@ -36,11 +39,10 @@ const register = asyncWrapper(async (req, res) => {
     password: hashingPassword,
   });
 
-  await user.save();
-
   res.status(201).json({
     status: httpStatusText.SUCCESS,
     data: { user },
+    message: userMessages.registerSuccess,
   });
 });
 
@@ -48,24 +50,24 @@ const login = asyncWrapper(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    throw CustomError.create(400, 'email and password is required');
+    throw CustomError.create(400, userMessages.emailAndPasswordRequired);
   }
 
   const user = await Users.findOne({ email });
 
   if (!user) {
-    throw CustomError.create(400, 'email is not true');
+    throw CustomError.create(400, userMessages.invalidEmail);
   }
 
   const matchPassword = await bcryptjs.compare(password, user.password);
   if (!matchPassword) {
-    throw CustomError.create(400, 'password is not accepted');
+    throw CustomError.create(400, userMessages.invalidPassword);
   }
 
   const token = await generateToken(user, '24h');
   return res.status(200).json({
     status: httpStatusText.SUCCESS,
-    message: 'login success',
+    message: userMessages.loginSuccess,
     data: { token },
   });
 });
@@ -74,13 +76,13 @@ const forgotPassword = asyncWrapper(async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
-    throw CustomError.create(400, 'email is required');
+    throw CustomError.create(400, userMessages.emailRequired);
   }
 
-  const user = await Users.findOne({ email }); //
+  const user = await Users.findOne({ email });
 
   if (!user) {
-    throw CustomError.create(400, 'email is not found');
+    throw CustomError.create(400, userMessages.invalidEmail);
   }
 
   const otp = await sendOTP(email);
@@ -93,7 +95,7 @@ const forgotPassword = asyncWrapper(async (req, res) => {
 
   return res.status(200).json({
     status: httpStatusText.SUCCESS,
-    message: 'OTP sent',
+    message: userMessages.otpSent,
     data: null,
   });
 });
@@ -107,20 +109,55 @@ const verifyOTP = asyncWrapper(async (req, res) => {
   }).sort({ createdAt: -1 });
 
   if (!otpRecord) {
-    throw CustomError.create(400, 'OTP expired or not found');
+    throw CustomError.create(400, userMessages.otpExpired);
   }
 
   if (otpRecord.otp !== otp) {
-    throw CustomError.create(400, 'Invalid OTP');
+    throw CustomError.create(400, userMessages.invalidOTP);
   }
   await OTP.deleteOne({ _id: otpRecord._id });
   const user = await Users.findOne({ email });
-  const token = await generateToken(user, '24h');
+  const payload = {
+    id: user._id,
+    email: user.email,
+  };
+  const token = await generateToken(payload, '24h');
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    message: 'OTP verified successfully',
+    message: userMessages.otpVerified,
     data: { token, id: user.id },
+  });
+});
+
+const resetPassword = asyncWrapper(async (req, res, next) => {
+  const { email, id, password } = req.body;
+
+  try {
+    await passwordSchema.validate({ password }, { abortEarly: false });
+  } catch (error) {
+    return next(new AppError(error.errors.join(', '), 400, httpStatusText.FAIL));
+  }
+
+  if (email === req.user.email && id === req.user.id) {
+    const admin = await Users.findById(req.user.id);
+    if (!admin) {
+      return next(new AppError(userMessages.invalidEmail, 404, httpStatusText.FAIL));
+    }
+
+    const hashingPassword = await bcryptjs.hash(password, 10);
+    admin.password = hashingPassword;
+    await admin.save();
+
+    return res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      message: userMessages.resetPasswordSuccess,
+    });
+  }
+
+  return res.status(400).json({
+    status: httpStatusText.FAIL,
+    message: userMessages.resetPasswordFail,
   });
 });
 
@@ -132,8 +169,8 @@ const getAllUser = asyncWrapper(async (req, res) => {
 
   const filter = search.trim() ? { title: { $regex: search, $options: 'i' } } : {};
 
-  if (req.user.data.role !== userRole.owner) {
-    throw CustomError.create(400, 'you can not show all users');
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, userMessages.notGetAccessibility);
   }
 
   const users = await Users.find(filter, { __v: false }).skip(skip).limit(limit);
@@ -141,7 +178,7 @@ const getAllUser = asyncWrapper(async (req, res) => {
   const total = await Users.countDocuments(filter);
 
   if (users.length === 0) {
-    throw CustomError.create(404, 'No users found');
+    throw CustomError.create(404, userMessages.userNotFound);
   }
 
   res.status(200).json({
@@ -162,17 +199,17 @@ const getOneUser = asyncWrapper(async (req, res) => {
   const id = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw CustomError.create(400, 'Invalid user id');
+    throw CustomError.create(400, userMessages.invalidIUserId);
   }
 
-  if (req.user.data.role !== userRole.owner) {
-    throw CustomError.create(400, 'you can not show this user');
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, userMessages.notGetAccessibility);
   }
 
   const user = await Users.findById(id, { __v: false, password: false });
 
   if (!user) {
-    throw CustomError.create(404, 'user not found');
+    throw CustomError.create(404, userMessages.userNotFound);
   }
 
   res.status(200).json({
@@ -181,81 +218,54 @@ const getOneUser = asyncWrapper(async (req, res) => {
   });
 });
 
-const editProfileData = asyncWrapper(async (req, res) => {
-  const id = req.params.id;
-  const { password, role, email, name, phone, whatsapp, favoriteContact, companyName } = req.body;
+const editProfileData = asyncWrapper(async (req, res, next) => {
+  const id = req.user._id;
+  const { password, email, name, phone, whatsapp, favoriteContact, companyName } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw CustomError.create(400, 'Invalid blog id');
+    throw CustomError.create(400, userMessages.invalidIUserId);
   }
 
   const user = await Users.findById(id, { __v: false });
 
   if (!user) {
-    throw CustomError.create(404, 'user not found');
+    throw CustomError.create(404, userMessages.invalidEmail);
   }
 
-  const isOwner = req.user.data.role === userRole.owner;
-  const isSameUser = req.user.data.email === user.email;
+  let hashedPassword = user.password;
 
-  if (isSameUser) {
-    if (role && role !== user.role) {
-      return res.status(403).json({
-        status: httpStatusText.FAIL,
-        message: 'You cannot change your role',
-      });
+  if (password) {
+    hashedPassword = await bcryptjs.hash(password, 10);
+    try {
+      await passwordSchema.validate({ password }, { abortEarly: false });
+    } catch (error) {
+      return next(new AppError(error.errors.join(', '), 400, httpStatusText.FAIL));
     }
+  }
 
-    let hashedPassword = user.password;
-    if (password && password.trim() !== '') {
-      hashedPassword = await bcryptjs.hash(password, 10);
-    }
+  const emailExists = await Users.findOne({ email });
 
-    const emailExists = await Users.findOne({ email });
-
-    if (emailExists) {
-      return res.status(400).json({
-        status: httpStatusText.FAIL,
-        message: 'Email already in use',
-      });
-    }
-
-    user.password = hashedPassword;
-    user.email = email || user.email;
-    user.name = name || user.name;
-    user.phone = phone || user.phone;
-    user.whatsapp = whatsapp || user.whatsapp;
-    user.favoriteContact = favoriteContact || user.favoriteContact;
-    user.companyName = companyName || user.companyName;
-
-    await user.save();
-
-    return res.status(200).json({
-      status: httpStatusText.SUCCESS,
-      data: { user },
+  if (emailExists) {
+    return res.status(400).json({
+      status: httpStatusText.FAIL,
+      message: userMessages.emailExists,
     });
   }
 
-  if (isOwner) {
-    if (!role) {
-      return res.status(400).json({
-        status: httpStatusText.FAIL,
-        message: 'Owner can only update the role field',
-      });
-    }
+  user.password = hashedPassword;
+  user.email = email || user.email;
+  user.name = name || user.name;
+  user.phone = phone || user.phone;
+  user.whatsapp = whatsapp || user.whatsapp;
+  user.favoriteContact = favoriteContact || user.favoriteContact;
+  user.companyName = companyName || user.companyName;
 
-    user.role = role || user.role;
+  await user.save();
 
-    await user.save();
-    return res.status(200).json({
-      status: httpStatusText.SUCCESS,
-      data: { user },
-    });
-  }
-
-  res.status(403).json({
-    status: httpStatusText.FAIL,
-    message: 'You do not have permission to edit this profile',
+  return res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: { user },
+    message: userMessages.updateSuccess,
   });
 });
 
@@ -263,22 +273,23 @@ const deleteOneUser = asyncWrapper(async (req, res) => {
   const id = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw CustomError.create(400, 'Invalid user id');
+    throw CustomError.create(400, userMessages.invalidIUserId);
   }
 
-  if (req.user.data.role !== userRole.owner) {
-    throw CustomError.create(400, 'you can not delete this user');
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, userMessages.notDeleteAccessibility);
   }
 
   const result = await Users.deleteOne({ _id: id });
 
   if (result.deletedCount === 0) {
-    throw CustomError.create(404, 'user not found');
+    throw CustomError.create(404, userMessages.userNotFound);
   }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: null,
+    message: userMessages.deleteSuccess,
   });
 });
 
@@ -287,6 +298,7 @@ module.exports = {
   login,
   forgotPassword,
   verifyOTP,
+  resetPassword,
   getAllUser,
   getOneUser,
   editProfileData,

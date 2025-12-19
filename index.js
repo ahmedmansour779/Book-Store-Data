@@ -38,16 +38,16 @@ app.use(express.json());
 
 // -------------------- Routes --------------------
 app.use('/api/blogs', routesBlogs);
-app.use('/api/auth', routesUsers);
+app.use('/api/jobs', routesJobs);
 app.use('/api/terms', routesTerms);
 app.use('/api/testimonials', routesTestimonials);
 app.use('/api/portfolio', routesPortfolio);
 app.use('/api/contact', routesContact);
-app.use('/api/jobs', routesJobs);
 app.use('/api/standard-service', routesStandardService);
 app.use('/api/custom-services', routesCustomServices);
 app.use('/api/payment', PaymentRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/auth', routesUsers);
 app.use('/api/admin', adminRoutes);
 
 // -------------------- 404 Not Found --------------------

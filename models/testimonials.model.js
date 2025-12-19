@@ -1,31 +1,34 @@
 const mongoose = require('mongoose');
+const { testimonialsMessages } = require('../constants');
 
-const ratingSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
+const ratingSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: [true, testimonialsMessages.titleIsRequire],
+    },
+    description: {
+      type: String,
+      required: [true, testimonialsMessages.descriptionIsRequire],
+    },
+    jobDescription: {
+      type: String,
+      required: [true, testimonialsMessages.jobDescriptionIsRequire],
+    },
+    rating: {
+      type: Number,
+      enum: [1, 2, 3, 4, 5],
+      default: 5,
+      required: [true, testimonialsMessages.ratingIsRequire],
+    },
+    image: {
+      type: String,
+      required: [true, testimonialsMessages.imageIsRequire],
+    },
   },
-  description: {
-    type: String,
-    required: true,
-  },
-  jobDescription: {
-    type: String,
-    required: true,
-  },
-  rating: {
-    type: Number,
-    enum: [1, 2, 3, 4, 5],
-    default: 5,
-    required: true,
-  },
-  image: {
-    type: String,
-    required: true,
-  },
-  created: {
-    type: String,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 module.exports = mongoose.model('rating', ratingSchema);

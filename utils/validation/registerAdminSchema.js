@@ -13,4 +13,11 @@ const adminSchema = yup.object().shape({
     .min(8, 'يجب أن تكون كلمة المرور 8 أحرف على الأقل'),
 });
 
-module.exports = adminSchema;
+const passwordSchema = yup.object({
+  password: yup
+    .string()
+    .required('كلمة المرور مطلوبة')
+    .min(8, 'يجب أن تكون كلمة المرور 8 أحرف على الأقل'),
+});
+
+module.exports = { adminSchema, passwordSchema };

@@ -1,6 +1,5 @@
 let express = require('express');
 const multer = require('multer');
-const validateImage = require('../middlewares/validate.Image');
 const verifyToken = require('../middlewares/verify.token');
 const {
   addOneJob,
@@ -10,23 +9,19 @@ const {
   updateJob,
   applyToJob,
 } = require('../controllers/job.controller');
-const checkPdf = require('../middlewares/validate.pdf');
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 const router = express.Router();
 
-router
-  .route('/')
-  .post(verifyToken, upload.single('image'), validateImage, addOneJob)
-  .get(verifyToken, getAllJobs);
+router.route('/').post(verifyToken, upload.none(), addOneJob).get(verifyToken, getAllJobs);
 
 router
   .route('/:id')
-  .post(upload.single('cv'), checkPdf, applyToJob)
-  .get(getOneJob)
+  .post(upload.none(), applyToJob)
+  .get(verifyToken, getOneJob)
   .delete(verifyToken, deleteOneJob)
-  .patch(verifyToken, upload.single('image'), validateImage, updateJob);
+  .patch(verifyToken, upload.none(), updateJob);
 
 module.exports = router;

@@ -21,6 +21,6 @@ router
   .route('/:id')
   .get(getOneBlog)
   .delete(verifyToken, deleteOneBlog)
-  .patch(verifyToken, upload.single('image'), validateImage, updateBlog);
+  .patch(verifyToken, upload.none(), validateImage, updateBlog);
 
 module.exports = router;

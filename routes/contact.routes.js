@@ -12,7 +12,7 @@ const upload = multer();
 
 const router = express.Router();
 
-router.route('/').post(upload.none(), addOneContact).get(verifyToken, getAllContact);
+router.route('/').post(upload.none(), verifyToken, addOneContact).get(verifyToken, getAllContact);
 
 router.route('/:id').get(verifyToken, getOneContact).delete(verifyToken, deleteOneContact);
 

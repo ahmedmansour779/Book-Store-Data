@@ -1,12 +1,11 @@
-// utils/uploadPdf.js
 const cloudinary = require('./cloudinary');
 
-module.exports = function uploadPdf(file, folder, name) {
+module.exports = function uploadPdf(file, folder) {
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null);
 
     const cleanFolderName = folder.slice(0, -1);
-    const fileName = `${cleanFolderName}-${name}-${Date.now()}`;
+    const fileName = `${cleanFolderName}-${Date.now()}`;
 
     const stream = cloudinary.uploader.upload_stream(
       {

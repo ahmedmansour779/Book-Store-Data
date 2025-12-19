@@ -1,17 +1,18 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const { userMessages } = require('../constants');
 
 const contactSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, userMessages.nameRequired],
   },
   companyName: {
     type: String,
   },
   email: {
     type: String,
-    required: true,
+    required: [true, userMessages.emailRequired],
     unique: true,
     validate: {
       validator: function (v) {
@@ -21,20 +22,20 @@ const contactSchema = new mongoose.Schema({
         const hasDot = localPart.includes('.');
         return !hasDot;
       },
-      message: 'Email must be a valid Gmail address without any dots before @',
+      message: userMessages.emailInvalid,
     },
   },
   phone: {
     type: String,
-    required: true,
+    required: [true, userMessages.phoneRequired],
   },
   subject: {
     type: String,
-    required: true,
+    required: [true, userMessages.subjectRequired],
   },
   massage: {
     type: String,
-    required: true,
+    required: [true, userMessages.massageRequired],
   },
 });
 

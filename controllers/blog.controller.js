@@ -81,7 +81,7 @@ const getOneBlog = asyncWrapper(async (req, res) => {
 });
 
 const deleteOneBlog = asyncWrapper(async (req, res) => {
-  if (req.user.role !== userRole.owner) {
+  if (req.user.role !== userRole.admin) {
     throw CustomError.create(400, blogsMessages.notDeleteAccessibility);
   }
 
