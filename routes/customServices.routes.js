@@ -1,7 +1,6 @@
 let express = require('express');
 const multer = require('multer');
 const verifyToken = require('../middlewares/verify.token');
-const checkPdf = require('../middlewares/validate.pdf');
 const {
   addOneCustomServices,
   getAllCustomServices,
@@ -16,7 +15,7 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(verifyToken, upload.single('file'), checkPdf, addOneCustomServices)
+  .post(verifyToken, upload.none(), addOneCustomServices)
   .get(verifyToken, getAllCustomServices);
 
 router

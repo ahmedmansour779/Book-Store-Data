@@ -5,7 +5,7 @@ const asyncWrapper = require('../middlewares/async.wrapper');
 const CustomError = require('../utils/custom.error');
 const mongoose = require('mongoose');
 const userRole = require('../utils/user.roles');
-const uploadPdf = require('../utils/upload.pdf');
+const { CustomServicesMessages } = require('../constants');
 
 const addOneCustomServices = asyncWrapper(async (req, res) => {
   const {
@@ -18,26 +18,14 @@ const addOneCustomServices = asyncWrapper(async (req, res) => {
     typeService,
     serviceDetails,
     massage,
+    file,
   } = req.body;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     throw CustomError.create(400, errors.errors[0].msg);
   }
 
-  if (req.user.data.role !== userRole.user) {
-    throw CustomError.create(400, 'you can not add Custom Services');
-  }
-
-  let file;
-  if (req.file) {
-    file = await uploadPdf(req.file, 'CustomServices', req.body.fullName);
-  }
-
-  if (!file) {
-    throw CustomError.create(400, 'file (pdf file) is required');
-  }
-
-  const idUser = req.user.data._id;
+  const idUser = req.user._id;
 
   const customServices = await CustomServices.create({
     name,
@@ -49,13 +37,14 @@ const addOneCustomServices = asyncWrapper(async (req, res) => {
     typeService,
     serviceDetails,
     massage,
-    file,
     idUser,
+    file,
   });
 
   res.status(201).json({
     status: httpStatusText.SUCCESS,
     data: { customServices },
+    message: CustomServicesMessages.addSuccess,
   });
 });
 
@@ -72,10 +61,10 @@ const getAllCustomServices = asyncWrapper(async (req, res) => {
   const total = await CustomServices.countDocuments(filter);
 
   if (customServices.length === 0) {
-    throw CustomError.create(404, 'No Custom Services found');
+    throw CustomError.create(404, CustomServicesMessages.notFound);
   }
 
-  if (req.user.data.role == userRole.owner || req.user.data.role == userRole.humanRelations) {
+  if (req.user.role == userRole.admin || req.user.role == userRole.humanRelations) {
     return res.status(200).json({
       status: httpStatusText.SUCCESS,
       data: {
@@ -90,52 +79,53 @@ const getAllCustomServices = asyncWrapper(async (req, res) => {
     });
   }
 
-  throw CustomError.create(400, 'just human Relations and owners can access to this data');
+  throw CustomError.create(400, CustomServicesMessages.justHrAndAdmin);
 });
 
 const getOneCustomServices = asyncWrapper(async (req, res) => {
   const id = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw CustomError.create(400, 'Invalid massage id');
+    throw CustomError.create(400, CustomServicesMessages.invalidId);
   }
 
   const customServices = await CustomServices.findById(id, { __v: false });
 
   if (!customServices) {
-    throw CustomError.create(404, 'Custom Services not found');
+    throw CustomError.create(404, CustomServicesMessages.notFound);
   }
 
-  if (req.user.data.role == userRole.owner || req.user.data.role == userRole.humanRelations) {
+  if (req.user.role == userRole.admin || req.user.role == userRole.humanRelations) {
     return res.status(200).json({
       status: httpStatusText.SUCCESS,
       data: { customServices },
     });
   }
 
-  throw CustomError.create(400, 'just human Relations and owners can access to this data');
+  throw CustomError.create(400, CustomServicesMessages.justHrAndAdmin);
 });
 
 const deleteOneCustomServices = asyncWrapper(async (req, res) => {
-  if (req.user.data.role !== userRole.owner) {
-    throw CustomError.create(400, 'you can not delete this Services');
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, CustomServicesMessages.notDeleteAccessibility);
   }
 
   const id = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw CustomError.create(400, 'Invalid massage id');
+    throw CustomError.create(400, CustomServicesMessages.invalidId);
   }
 
   const result = await CustomServices.deleteOne({ _id: id });
 
   if (result.deletedCount === 0) {
-    throw CustomError.create(404, 'Services not found');
+    throw CustomError.create(404, CustomServicesMessages.notFound);
   }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: null,
+    message: CustomServicesMessages.deleteSuccess,
   });
 });
 

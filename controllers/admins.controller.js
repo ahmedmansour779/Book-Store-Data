@@ -11,6 +11,130 @@ const AppError = require('../utils/app.error');
 const { adminMessages } = require('../constants/index');
 const OTP = require('../models/otp.model');
 const { sendOTP } = require('../utils/sendOTP');
+const userRole = require('../utils/user.roles');
+const CustomError = require('../utils/custom.error');
+const { default: mongoose } = require('mongoose');
+
+const getAllAdmins = asyncWrapper(async (req, res) => {
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, adminMessages.notShowAccessibility);
+  }
+
+  const search = req.query.search || '';
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const filter = search.trim() ? { title: { $regex: search, $options: 'i' } } : {};
+
+  const admins = await Admin.find(filter, { __v: false, password: false }).skip(skip).limit(limit);
+
+  const total = await Admin.countDocuments(filter);
+
+  if (admins.length === 0) {
+    throw CustomError.create(404, adminMessages.notFound);
+  }
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: {
+      admins,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    },
+  });
+});
+
+const getOneAdmin = asyncWrapper(async (req, res, next) => {
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, adminMessages.notShowAccessibility);
+  }
+  const id = req.params.id;
+
+  const admin = await Admin.findById(id).select('-password -__v');
+
+  if (!admin) {
+    return next(new AppError(adminMessages.notFound, 404, httpStatusText.FAIL));
+  }
+
+  return res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: adminMessages.dataFetched,
+    data: admin,
+  });
+});
+
+const deleteOneAdmin = asyncWrapper(async (req, res) => {
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, adminMessages.notDeleteAccessibility);
+  }
+  const id = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw CustomError.create(400, adminMessages.invalidId);
+  }
+
+  const result = await Admin.deleteOne({ _id: id });
+
+  if (result.deletedCount === 0) {
+    throw CustomError.create(404, adminMessages.notFound);
+  }
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: null,
+    message: adminMessages.deleteSuccess,
+  });
+});
+
+const changeRoleAdmin = asyncWrapper(async (req, res) => {
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, adminMessages.notEditAccessibility);
+  }
+
+  const { id } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw CustomError.create(400, adminMessages.invalidId);
+  }
+
+  const admin = await Admin.findById(id);
+
+  admin.role = req.body.role;
+
+  await admin.save();
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: { admin },
+    message: adminMessages.changeRoleSuccess,
+  });
+});
+
+const updateAdminData = asyncWrapper(async (req, res) => {
+  if (req.body.role) {
+    throw CustomError.create(400, adminMessages.notEditAccessibility);
+  }
+  const result = await Admin.findById(req.user.id);
+
+  Object.keys(req.body).forEach((key) => {
+    if (req.body[key].length > 0) {
+      result[key] = req.body[key];
+    }
+  });
+
+  await result.save();
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: { result },
+    message: adminMessages.editSuccess,
+  });
+});
 
 const getAdminData = asyncWrapper(async (req, res, next) => {
   const admin = await Admin.findById(req.user.id).select('-password -__v');
@@ -213,4 +337,9 @@ module.exports = {
   adminForgotPassword,
   verifyOTP,
   resetPasswordAdmin,
+  getAllAdmins,
+  getOneAdmin,
+  deleteOneAdmin,
+  changeRoleAdmin,
+  updateAdminData,
 };

@@ -1,4 +1,27 @@
+const globalMessages = {
+  addSuccess: 'تم الاضافه بنجاح',
+  editSuccess: 'تم التعديل بنجاح',
+  deleteSuccess: 'تم الحذف بنجاح',
+  invalidId: 'معرف العنصر غير صحيح',
+  notFound: 'لا توجد عناصر',
+  titleIsRequire: 'العنوان مطلوب',
+  itemsIsRequire: 'العناصر مطلوب',
+  contentIsRequire: 'المحتوي مطلوب',
+  descriptionIsRequire: 'الوصف مطلوب',
+  jobDescriptionIsRequire: 'المسمي الوظيفي مطلوب',
+  ratingIsRequire: 'التقيم مطلوب',
+  imageIsRequire: 'الصورة مطلوبة',
+  urlIsRequire: 'الرابط مطلوب',
+  categoryIsRequire: 'التصنيف مطلوب',
+  notAddAccessibility: 'ليس لديك صلاحية لاضافة',
+  notEditAccessibility: 'ليس لديك صلاحية التعديل',
+  notDeleteAccessibility: 'ليس لديك صلاحية الحذف',
+  notShowAccessibility: 'ليس لديك صلاحية الوصول',
+  errorDeletingImage: 'حدث خطا في حذف الصورة من الخادم',
+};
+
 const adminMessages = {
+  ...globalMessages,
   adminExists: 'المسؤول مسجل بالفعل',
   adminNotFound: 'البريد الإلكتروني غير مسجل',
   invalidCredentials: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
@@ -13,9 +36,11 @@ const adminMessages = {
   dataFetched: 'تم جلب البيانات بنجاح',
   resetPasswordSuccess: 'تم تغير كلمة المرور بنجاح يمكنك تسجيل الدخول',
   resetPasswordFail: 'البريد الالكتروني او المعرف غير صحيح',
+  changeRoleSuccess: 'تم تغير الدور بنجاح',
 };
 
 const blogsMessages = {
+  ...globalMessages,
   notAddAccessibility: 'لا يمكنك إضافة مقالة',
   blogAddSuccess: 'تم اضافة المقالة بنجاح',
   notBlogsFound: 'لا توجد مقالات',
@@ -28,6 +53,7 @@ const blogsMessages = {
 };
 
 const jobsMessages = {
+  ...globalMessages,
   notAddAccessibility: 'لا يمكنك أضافة وظيفة',
   JobsAddSuccess: 'تم اضافة الوظيفة بنجاح',
   notJobsFound: 'لا توجد وظائف',
@@ -38,6 +64,15 @@ const jobsMessages = {
   notUpdataAccessibility: 'لا يمكنك تعديل هذه الوظيفة',
   updateSuccess: 'تم تعديل الوظيفة بنجاح',
   applySuccess: 'تم التقديم بنجاح',
+  fullName: 'الاسم مطلوب',
+  country: 'الدولة مطلوبة',
+  state: 'المدينة مطلوبة',
+  gender: 'النوع مطلوب',
+  email: 'البريد الإلكتروني مطلوب',
+  phone: 'رقم الهاتف مطلوب',
+  cv: 'السيرة الذاتية مطلوبة',
+  employmentType: 'نوع الوظيفة مطلوبة',
+  experience: 'الخبرة مطلوبة',
 };
 
 const userMessages = {
@@ -71,47 +106,38 @@ const userMessages = {
   userNotFound: 'لا يوجد مستخدمين',
   notDeleteAccessibility: 'لا يمكنك حذف هذه الحساب',
   deleteSuccess: 'تم حذف الحساب بنجاح',
-};
-
-const globalMassges = {
-  addSuccess: 'تم الاضافه بنجاح',
-  editSuccess: 'تم التعديل بنجاح',
-  deleteSuccess: 'تم الحذف بنجاح',
-  invalidId: 'معرف العنصر غير صحيح',
-  notFound: 'لا توجد عناصر',
-  titleIsRequire: 'العنوان مطلوب',
-  itemsIsRequire: 'العناصر مطلوب',
-  descriptionIsRequire: 'الوصف مطلوب',
-  jobDescriptionIsRequire: 'المسمي الوظيفي مطلوب',
-  ratingIsRequire: 'التقيم مطلوب',
-  imageIsRequire: 'الصورة مطلوبة',
-  urlIsRequire: 'الرابط مطلوب',
-  categoryIsRequire: 'التصنيف مطلوب',
-  notAddAccessibility: 'ليس لديك صلاحية لاضافة',
-  notEditAccessibility: 'ليس لديك صلاحية التعديل',
-  notDeleteAccessibility: 'ليس لديك صلاحية الحذف',
-  notShowAccessibility: 'ليس لديك صلاحية الوصول',
+  typeServiceRequired: 'نوع الخدمة مطلوب',
+  serviceDetailsRequired: 'تفاصيل الخدمة مطلوبة',
 };
 
 const termsMessages = {
-  ...globalMassges,
+  ...globalMessages,
   notAddAccessibility: 'ليس لديك صلاحية اضافة الشروط',
   notEditAccessibility: 'ليس لديك صلاحية تعديل هذا الشرط',
   mustBeArray: 'يجب ان تكون العناصر علي هيئة مصفوفة بداخلها عناصر نصية',
 };
 
 const testimonialsMessages = {
-  ...globalMassges,
+  ...globalMessages,
 };
 
 const portfolioMessages = {
-  ...globalMassges,
-  errorDeletingImage: 'حدث خطا في حذف الصورة من الخادم',
+  ...globalMessages,
 };
 
 const contactMessages = {
-  ...globalMassges,
-  errorDeletingImage: 'حدث خطا في حذف الصورة من الخادم',
+  ...globalMessages,
+};
+
+const StandardServiceMessages = {
+  ...globalMessages,
+  priceEgypt: 'السعر المصري مطلوب',
+  priceSaudi: 'السعر السعودي مطلوب',
+};
+
+const CustomServicesMessages = {
+  ...globalMessages,
+  justHrAndAdmin: 'فقط موظف العلاقات العامة والمشرف فقط يمكنهم الحصول علي هذة البيانات',
 };
 
 module.exports = {
@@ -123,4 +149,6 @@ module.exports = {
   testimonialsMessages,
   portfolioMessages,
   contactMessages,
+  StandardServiceMessages,
+  CustomServicesMessages,
 };

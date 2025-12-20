@@ -1,35 +1,36 @@
 const mongoose = require('mongoose');
+const { jobsMessages } = require('../constants');
 
 const applicationSchema = new mongoose.Schema(
   {
     fullName: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.fullName],
     },
     country: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.country],
     },
     state: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.state],
     },
     gender: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.gender],
       enum: ['male', 'female', 'other'],
     },
     email: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.email],
     },
     phone: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.phone],
     },
     cv: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.cv],
     },
     message: {
       type: String,
@@ -49,26 +50,26 @@ const jobSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.titleIsRequire],
     },
     description: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.descriptionIsRequire],
     },
     image: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.imageIsRequire],
     },
     created: {
       type: String,
     },
     employmentType: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.employmentType],
     },
     experience: {
       type: String,
-      required: true,
+      required: [true, jobsMessages.experience],
     },
     author: {
       type: String,

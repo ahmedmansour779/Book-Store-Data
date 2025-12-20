@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const favoriteContact = require('../utils/favorite.contact');
+const { userMessages } = require('../constants');
 
 const customServicesSchema = new mongoose.Schema(
   {
@@ -9,14 +10,14 @@ const customServicesSchema = new mongoose.Schema(
     },
     name: {
       type: String,
-      required: true,
+      required: [true, userMessages.nameRequired],
     },
     companyName: {
       type: String,
     },
     email: {
       type: String,
-      required: true,
+      required: [true, userMessages.emailRequired],
       unique: true,
       validate: {
         validator: function (v) {
@@ -26,20 +27,20 @@ const customServicesSchema = new mongoose.Schema(
           const hasDot = localPart.includes('.');
           return !hasDot;
         },
-        message: 'Email must be a valid Gmail address without any dots before @',
+        message: userMessages.emailInvalid,
       },
     },
     phone: {
       type: String,
-      required: true,
+      required: [true, userMessages.phoneRequired],
     },
     whatsapp: {
       type: String,
-      required: true,
+      required: [true, userMessages.whatsappRequired],
     },
     favoriteContact: {
       type: String,
-      required: true,
+      required: [true, userMessages.favoriteContactRequired],
       enum: [favoriteContact.email, favoriteContact.phone, favoriteContact.whatsapp],
     },
     file: {
@@ -47,15 +48,15 @@ const customServicesSchema = new mongoose.Schema(
     },
     typeService: {
       type: String,
-      required: true,
+      required: [true, userMessages.typeServiceRequired],
     },
     serviceDetails: {
       type: String,
-      required: true,
+      required: [true, userMessages.serviceDetailsRequired],
     },
     massage: {
       type: String,
-      required: true,
+      required: [true, userMessages.massageRequired],
     },
   },
   {
