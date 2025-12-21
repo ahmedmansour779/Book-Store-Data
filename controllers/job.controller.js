@@ -93,6 +93,38 @@ const getAllJobs = asyncWrapper(async (req, res) => {
   });
 });
 
+const getAllJobsForSite = asyncWrapper(async (req, res) => {
+  const search = req.query.search || '';
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const filter = search.trim() ? { title: { $regex: search, $options: 'i' } } : {};
+
+  const jobs = await Jobs.find(filter, { __v: false, applications: false, author: false })
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Jobs.countDocuments(filter);
+
+  if (jobs.length === 0) {
+    throw CustomError.create(404, jobsMessages.JobNotFound);
+  }
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: {
+      jobs,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    },
+  });
+});
+
 const getOneJob = asyncWrapper(async (req, res) => {
   const id = req.params.id;
 
@@ -226,4 +258,5 @@ module.exports = {
   deleteOneJob,
   updateJob,
   applyToJob,
+  getAllJobsForSite,
 };

@@ -88,6 +88,39 @@ const getAllStandardService = asyncWrapper(async (req, res) => {
   });
 });
 
+const getAllStandardServiceAllPrices = asyncWrapper(async (req, res) => {
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, StandardServiceMessages.notShowAccessibility);
+  }
+  const search = req.query.search || '';
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const filter = search.trim() ? { title: { $regex: search, $options: 'i' } } : {};
+
+  const services = await StandardService.find(filter, { __v: false }).skip(skip).limit(limit);
+
+  const total = await StandardService.countDocuments(filter);
+
+  if (services.length === 0) {
+    throw CustomError.create(404, StandardServiceMessages.notFound);
+  }
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: {
+      services,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    },
+  });
+});
+
 const updateStandardService = asyncWrapper(async (req, res) => {
   const { id } = req.params;
 
@@ -162,4 +195,5 @@ module.exports = {
   updateStandardService,
   deleteOneStandardService,
   applyStandardService,
+  getAllStandardServiceAllPrices,
 };

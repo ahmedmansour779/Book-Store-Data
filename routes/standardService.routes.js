@@ -7,6 +7,7 @@ const {
   updateStandardService,
   deleteOneStandardService,
   applyStandardService,
+  getAllStandardServiceAllPrices,
 } = require('../controllers/standardService.controller');
 
 const storage = multer.memoryStorage();
@@ -18,6 +19,8 @@ router
   .route('/')
   .post(verifyToken, upload.none(), addOneStandardService)
   .get(getAllStandardService);
+
+router.route('/all-prices').get(verifyToken, getAllStandardServiceAllPrices);
 
 router
   .route('/:id')

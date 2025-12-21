@@ -8,6 +8,7 @@ const {
   deleteOneJob,
   updateJob,
   applyToJob,
+  getAllJobsForSite,
 } = require('../controllers/job.controller');
 
 const storage = multer.memoryStorage();
@@ -16,6 +17,7 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 const router = express.Router();
 
 router.route('/').post(verifyToken, upload.none(), addOneJob).get(verifyToken, getAllJobs);
+router.route('/all-jobs-users').get(getAllJobsForSite);
 
 router
   .route('/:id')
