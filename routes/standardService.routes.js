@@ -15,15 +15,15 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 const router = express.Router();
 
-router
-  .route('/')
-  .post(verifyToken, upload.none(), addOneStandardService)
-  .get(getAllStandardService);
-
-router.route('/all-prices').get(verifyToken, getAllStandardServiceAllPrices);
+router.route('/').get(getAllStandardService);
 
 router
-  .route('/:id')
+  .route('/all-prices')
+  .get(verifyToken, getAllStandardServiceAllPrices)
+  .post(verifyToken, upload.none(), addOneStandardService);
+
+router
+  .route('/all-prices/:id')
   .patch(verifyToken, upload.none(), updateStandardService)
   .delete(verifyToken, deleteOneStandardService)
   .post(applyStandardService);

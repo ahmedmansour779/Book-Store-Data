@@ -13,10 +13,6 @@ const addOneContact = asyncWrapper(async (req, res) => {
     throw CustomError.create(400, errors.errors[0].msg);
   }
 
-  if (req.user.role !== userRole.admin) {
-    throw CustomError.create(400, contactMessages.notAddAccessibility);
-  }
-
   const { name, companyName, email, phone, subject, massage } = req.body;
 
   const result = await Contact.create({ name, companyName, email, phone, subject, massage });

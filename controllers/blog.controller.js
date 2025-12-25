@@ -44,7 +44,18 @@ const getAllBlogs = asyncWrapper(async (req, res) => {
   const total = await Blogs.countDocuments(filter);
 
   if (blogs.length === 0) {
-    throw CustomError.create(404, blogsMessages.notBlogsFound);
+    res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: {
+        blogs: [],
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
+    });
   }
 
   res.status(200).json({
