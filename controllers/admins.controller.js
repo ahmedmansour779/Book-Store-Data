@@ -151,6 +151,10 @@ const getAdminData = asyncWrapper(async (req, res, next) => {
 });
 
 const adminRegister = asyncWrapper(async (req, res, next) => {
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, adminMessages.notAddAccessibility);
+  }
+
   const { name, phone, email, password, role } = req.body;
 
   try {
