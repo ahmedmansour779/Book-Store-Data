@@ -123,6 +123,11 @@ const updateAdminData = asyncWrapper(async (req, res) => {
     }
   });
 
+  if (req.body.password) {
+    const hashingPassword = await bcryptjs.hash(req.body.password, 10);
+    result.password = hashingPassword;
+  }
+
   await result.save();
 
   res.status(200).json({

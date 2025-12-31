@@ -4,7 +4,8 @@ module.exports = function uploadPdf(file, folder) {
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null);
 
-    const cleanFolderName = folder.slice(0, -1);
+    const cleanFolderName = folder.endsWith('/') ? folder.slice(0, -1) : folder;
+
     const fileName = `${cleanFolderName}-${Date.now()}`;
 
     const stream = cloudinary.uploader.upload_stream(
@@ -12,11 +13,15 @@ module.exports = function uploadPdf(file, folder) {
         folder,
         public_id: fileName,
         resource_type: 'raw',
-        format: 'pdf',
+        access_mode: 'public', // ⭐ يخليه Public
       },
       (err, result) => {
         if (err) return reject(err);
-        resolve(result.secure_url);
+
+        // ⭐ لينك تحميل مباشر
+        const downloadUrl = result.secure_url.replace('/upload/', '/upload/fl_attachment/');
+
+        resolve(downloadUrl);
       }
     );
 
