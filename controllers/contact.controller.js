@@ -39,10 +39,6 @@ const getAllContact = asyncWrapper(async (req, res) => {
 
   const total = await Contact.countDocuments(filter);
 
-  if (massages.length === 0) {
-    throw CustomError.create(404, contactMessages.notFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: {
@@ -69,13 +65,9 @@ const getOneContact = asyncWrapper(async (req, res) => {
 
   const massage = await Contact.findById(id, { __v: false });
 
-  if (!massage) {
-    throw CustomError.create(404, contactMessages.notFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { massage },
+    data: massage ? { massage } : null,
   });
 });
 

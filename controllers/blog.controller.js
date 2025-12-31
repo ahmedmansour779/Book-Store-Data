@@ -43,21 +43,6 @@ const getAllBlogs = asyncWrapper(async (req, res) => {
 
   const total = await Blogs.countDocuments(filter);
 
-  if (blogs.length === 0) {
-    res.status(200).json({
-      status: httpStatusText.SUCCESS,
-      data: {
-        blogs: [],
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit),
-        },
-      },
-    });
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: {
@@ -81,13 +66,9 @@ const getOneBlog = asyncWrapper(async (req, res) => {
 
   const blog = await Blogs.findById(id, { __v: false });
 
-  if (!blog) {
-    throw CustomError.create(404, blogsMessages.blogNotFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { blog },
+    data: blog ? { blog } : null,
   });
 });
 

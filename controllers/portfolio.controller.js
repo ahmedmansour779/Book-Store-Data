@@ -46,10 +46,6 @@ const getAllPortfolio = asyncWrapper(async (req, res) => {
 
     const total = await Portfolio.countDocuments(filter);
 
-    if (portfolio.length === 0) {
-      throw CustomError.create(404, portfolioMessages.notFound);
-    }
-
     return res.status(200).json({
       status: httpStatusText.SUCCESS,
       data: {
@@ -69,10 +65,6 @@ const getAllPortfolio = asyncWrapper(async (req, res) => {
   const portfolio = await Portfolio.find(filter, { __v: false }).skip(skip).limit(limit);
 
   const total = await Portfolio.countDocuments(filter);
-
-  if (portfolio.length === 0) {
-    throw CustomError.create(404, portfolioMessages.notFound);
-  }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
@@ -97,13 +89,9 @@ const getOnePortfolio = asyncWrapper(async (req, res) => {
 
   const portfolio = await Portfolio.findById(id, { __v: false });
 
-  if (!portfolio) {
-    throw CustomError.create(404, portfolioMessages.notFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { portfolio },
+    data: portfolio ? { portfolio } : null,
   });
 });
 

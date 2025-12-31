@@ -49,10 +49,6 @@ const getAllTerms = asyncWrapper(async (req, res) => {
 
   const total = await Terms.countDocuments(filter);
 
-  if (terms.length === 0) {
-    throw CustomError.create(404, termsMessages.notFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: {
@@ -76,13 +72,9 @@ const getOneTerm = asyncWrapper(async (req, res) => {
 
   const term = await Terms.findById(id, { __v: false });
 
-  if (!term) {
-    throw CustomError.create(404, termsMessages.notFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { term },
+    data: term ? { term } : null,
   });
 });
 

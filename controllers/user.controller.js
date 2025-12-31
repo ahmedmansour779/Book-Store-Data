@@ -177,10 +177,6 @@ const getAllUser = asyncWrapper(async (req, res) => {
 
   const total = await Users.countDocuments(filter);
 
-  if (users.length === 0) {
-    throw CustomError.create(404, userMessages.userNotFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: {
@@ -208,13 +204,9 @@ const getOneUser = asyncWrapper(async (req, res) => {
 
   const user = await Users.findById(id, { __v: false, password: false });
 
-  if (!user) {
-    throw CustomError.create(404, userMessages.userNotFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { user },
+    data: user ? { user } : null,
   });
 });
 

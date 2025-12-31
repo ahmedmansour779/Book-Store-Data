@@ -54,10 +54,6 @@ const getAllJobs = asyncWrapper(async (req, res) => {
 
     const total = await Jobs.countDocuments(filter);
 
-    if (jobs.length === 0) {
-      throw CustomError.create(404, jobsMessages.JobNotFound);
-    }
-
     res.status(200).json({
       status: httpStatusText.SUCCESS,
       data: {
@@ -74,10 +70,6 @@ const getAllJobs = asyncWrapper(async (req, res) => {
   const jobs = await Jobs.find(filter, { __v: false }).skip(skip).limit(limit);
 
   const total = await Jobs.countDocuments(filter);
-
-  if (jobs.length === 0) {
-    throw CustomError.create(404, jobsMessages.JobNotFound);
-  }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
@@ -107,10 +99,6 @@ const getAllJobsForSite = asyncWrapper(async (req, res) => {
 
   const total = await Jobs.countDocuments(filter);
 
-  if (jobs.length === 0) {
-    throw CustomError.create(404, jobsMessages.JobNotFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: {
@@ -135,25 +123,17 @@ const getOneJob = asyncWrapper(async (req, res) => {
   if (req.user.role !== userRole.humanRelations) {
     const job = await Jobs.findById(id, { __v: false, applications: false, author: false });
 
-    if (!job) {
-      throw CustomError.create(404, jobsMessages.JobNotFound);
-    }
-
     res.status(200).json({
       status: httpStatusText.SUCCESS,
-      data: { job },
+      data: job ? { job } : null,
     });
   }
 
   const job = await Jobs.findById(id, { __v: false });
 
-  if (!job) {
-    throw CustomError.create(404, jobsMessages.JobNotFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { job },
+    data: job ? { job } : null,
   });
 });
 

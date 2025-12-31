@@ -60,10 +60,6 @@ const getAllCustomServices = asyncWrapper(async (req, res) => {
 
   const total = await CustomServices.countDocuments(filter);
 
-  if (customServices.length === 0) {
-    throw CustomError.create(404, CustomServicesMessages.notFound);
-  }
-
   if (req.user.role == userRole.admin || req.user.role == userRole.humanRelations) {
     return res.status(200).json({
       status: httpStatusText.SUCCESS,
@@ -91,14 +87,10 @@ const getOneCustomServices = asyncWrapper(async (req, res) => {
 
   const customServices = await CustomServices.findById(id, { __v: false });
 
-  if (!customServices) {
-    throw CustomError.create(404, CustomServicesMessages.notFound);
-  }
-
   if (req.user.role == userRole.admin || req.user.role == userRole.humanRelations) {
     return res.status(200).json({
       status: httpStatusText.SUCCESS,
-      data: { customServices },
+      data: customServices ? { customServices } : null,
     });
   }
 

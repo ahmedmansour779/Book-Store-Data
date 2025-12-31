@@ -24,7 +24,7 @@ const addOneStandardService = asyncWrapper(async (req, res) => {
 
   res.status(201).json({
     status: httpStatusText.SUCCESS,
-    data: { service },
+    data: service ? { service } : null,
     message: StandardServiceMessages.addSuccess,
   });
 });
@@ -46,10 +46,6 @@ const getAllStandardService = asyncWrapper(async (req, res) => {
 
     const total = await StandardService.countDocuments(filter);
 
-    if (services.length === 0) {
-      throw CustomError.create(404, StandardServiceMessages.notFound);
-    }
-
     res.status(200).json({
       status: httpStatusText.SUCCESS,
       data: {
@@ -69,10 +65,6 @@ const getAllStandardService = asyncWrapper(async (req, res) => {
     .limit(limit);
 
   const total = await StandardService.countDocuments(filter);
-
-  if (services.length === 0) {
-    throw CustomError.create(404, 'No services found');
-  }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
@@ -102,10 +94,6 @@ const getAllStandardServiceAllPrices = asyncWrapper(async (req, res) => {
   const services = await StandardService.find(filter, { __v: false }).skip(skip).limit(limit);
 
   const total = await StandardService.countDocuments(filter);
-
-  if (services.length === 0) {
-    throw CustomError.create(404, StandardServiceMessages.notFound);
-  }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,

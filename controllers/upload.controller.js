@@ -30,20 +30,20 @@ const uploadImageMethod = asyncWrapper(async (req, res, next) => {
 });
 
 const uploadFileMethod = asyncWrapper(async (req, res, next) => {
-  if (!req.files[0]) {
+  if (!req.file) {
     return next(new AppError('لم يتم إرفاق ملف', 400));
   }
 
-  if (req.files[0].mimetype !== 'application/pdf') {
+  if (req.file.mimetype !== 'application/pdf') {
     return next(new AppError('يجب رفع ملف PDF فقط', 400));
   }
 
   const maxSize = 5 * 1024 * 1024;
-  if (req.files[0].size > maxSize) {
+  if (req.file.size > maxSize) {
     return next(new AppError('حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت', 400));
   }
 
-  const pdfUrl = await uploadPdf(req.files[0], 'file');
+  const pdfUrl = await uploadPdf(req.file, 'file');
 
   if (!pdfUrl) {
     return next(new AppError('فشل رفع الملف. يرجى المحاولة مرة أخرى', 500));

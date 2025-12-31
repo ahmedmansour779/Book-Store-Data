@@ -46,10 +46,6 @@ const getAllTestimonials = asyncWrapper(async (req, res) => {
 
   const total = await Testimonials.countDocuments(filter);
 
-  if (testimonials.length === 0) {
-    throw CustomError.create(404, testimonialsMessages.notFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: {
@@ -73,13 +69,9 @@ const getOneTestimonial = asyncWrapper(async (req, res) => {
 
   const testimonial = await Testimonials.findById(id, { __v: false });
 
-  if (!testimonial) {
-    throw CustomError.create(404, testimonialsMessages.notFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { testimonial },
+    data: testimonial ? { testimonial } : null,
   });
 });
 

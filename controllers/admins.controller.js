@@ -31,10 +31,6 @@ const getAllAdmins = asyncWrapper(async (req, res) => {
 
   const total = await Admin.countDocuments(filter);
 
-  if (admins.length === 0) {
-    throw CustomError.create(404, adminMessages.notFound);
-  }
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: {
@@ -151,10 +147,6 @@ const getAdminData = asyncWrapper(async (req, res, next) => {
 });
 
 const adminRegister = asyncWrapper(async (req, res, next) => {
-  if (req.user.role !== userRole.admin) {
-    throw CustomError.create(400, adminMessages.notAddAccessibility);
-  }
-
   const { name, phone, email, password, role } = req.body;
 
   try {

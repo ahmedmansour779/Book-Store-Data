@@ -21,7 +21,7 @@ const upload = multer();
 router.use(upload.none());
 
 router.get('/check-auth', verifyToken, getAdminData);
-router.post('/', verifyToken, adminRegister);
+router.post('/register', adminRegister);
 router.post('/login', adminLogin);
 router.post('/forgot-password', adminForgotPassword);
 router.post('/verify-otp', verifyOTP);
