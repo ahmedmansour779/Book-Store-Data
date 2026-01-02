@@ -49,8 +49,6 @@ const uploadFileMethod = asyncWrapper(async (req, res, next) => {
     return next(new AppError('فشل رفع الملف. يرجى المحاولة مرة أخرى', 500));
   }
 
-  req.body.file = pdfUrl;
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: { file: pdfUrl },

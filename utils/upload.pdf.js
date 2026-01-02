@@ -13,6 +13,9 @@ module.exports = function uploadPdf(file, folder) {
         folder,
         public_id: fileName,
         resource_type: 'raw',
+        use_filename: true,
+        unique_filename: false,
+        format: 'pdf',
         access_mode: 'public', // ⭐ يخليه Public
       },
       (err, result) => {
