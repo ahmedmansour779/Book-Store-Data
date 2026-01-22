@@ -1,12 +1,9 @@
-let express = require('express');
-const multer = require('multer');
-const verifyToken = require('../middlewares/verify.token');
-const {
-  addOneContact,
-  getAllContact,
-  getOneContact,
-  deleteOneContact,
-} = require('../controllers/contact.controller');
+import express from 'express';
+import multer from 'multer';
+import verifyToken from '../middlewares/verify.token.js';
+import contactController from '../controllers/contact.controller.js';
+
+const { addOneContact, getAllContact, getOneContact, deleteOneContact } = contactController;
 
 const upload = multer();
 
@@ -16,4 +13,4 @@ router.route('/').post(upload.none(), addOneContact).get(verifyToken, getAllCont
 
 router.route('/:id').get(verifyToken, getOneContact).delete(verifyToken, deleteOneContact);
 
-module.exports = router;
+export default router;

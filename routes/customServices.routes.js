@@ -1,12 +1,14 @@
-let express = require('express');
-const multer = require('multer');
-const verifyToken = require('../middlewares/verify.token');
+import express from 'express';
+import multer from 'multer';
+import verifyToken from '../middlewares/verify.token.js';
+import customServiceController from '../controllers/customServices.controller.js';
+
 const {
   addOneCustomServices,
   getAllCustomServices,
   getOneCustomServices,
   deleteOneCustomServices,
-} = require('../controllers/customServices.controller');
+} = customServiceController;
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
@@ -23,4 +25,4 @@ router
   .get(verifyToken, getOneCustomServices)
   .delete(verifyToken, deleteOneCustomServices);
 
-module.exports = router;
+export default router;

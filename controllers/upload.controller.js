@@ -1,8 +1,8 @@
-const asyncWrapper = require('../middlewares/async.wrapper');
-const httpStatusText = require('../utils/http.status.text');
-const uploadImage = require('../utils/upload.Image');
-const AppError = require('../utils/app.error');
-const uploadPdf = require('../utils/upload.pdf');
+import asyncWrapper from '../middlewares/async.wrapper.js';
+import * as httpStatusText from '../utils/constants/http.status.text.js';
+import uploadImage from '../utils/upload/upload.Image.js';
+import AppError from '../utils/errors/app.error.js';
+import uploadPdf from '../utils/upload/upload.pdf.js';
 
 const uploadImageMethod = asyncWrapper(async (req, res, next) => {
   if (!req.file) {
@@ -56,4 +56,4 @@ const uploadFileMethod = asyncWrapper(async (req, res, next) => {
   });
 });
 
-module.exports = { uploadImageMethod, uploadFileMethod };
+export default { uploadImageMethod, uploadFileMethod };

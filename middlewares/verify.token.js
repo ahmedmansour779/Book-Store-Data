@@ -1,6 +1,6 @@
-const jwt = require('jsonwebtoken');
-const AppError = require('../utils/app.error');
-const httpStatusText = require('../utils/http.status.text');
+import jwt from 'jsonwebtoken';
+import AppError from '../utils/errors/app.error.js';
+import * as httpStatusText from '../utils/constants/http.status.text.js';
 
 const messages = {
   tokenRequired: 'يجب تسجيل الدخول أولاً',
@@ -45,4 +45,4 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
-module.exports = verifyToken;
+export default verifyToken;

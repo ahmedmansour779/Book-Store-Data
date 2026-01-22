@@ -1,11 +1,11 @@
-const { validationResult } = require('express-validator');
-const CustomServices = require('../models/customServices.model');
-const httpStatusText = require('../utils/http.status.text');
-const asyncWrapper = require('../middlewares/async.wrapper');
-const CustomError = require('../utils/custom.error');
-const mongoose = require('mongoose');
-const userRole = require('../utils/user.roles');
-const { CustomServicesMessages } = require('../constants');
+import { validationResult } from 'express-validator';
+import mongoose from 'mongoose';
+import { CustomServicesMessages } from '../constants/index.js';
+import asyncWrapper from '../middlewares/async.wrapper.js';
+import CustomServices from '../models/customServices.model.js';
+import adminRole from '../utils/constants/admin.roles.js';
+import * as httpStatusText from '../utils/constants/http.status.text.js';
+import CustomError from '../utils/errors/custom.error.js';
 
 const addOneCustomServices = asyncWrapper(async (req, res) => {
   const {
@@ -54,28 +54,46 @@ const getAllCustomServices = asyncWrapper(async (req, res) => {
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  const filter = search.trim() ? { name: { $regex: search, $options: 'i' } } : {};
+  let filter = search.trim() ? { name: { $regex: search, $options: 'i' } } : {};
 
-  const customServices = await CustomServices.find(filter, { __v: false }).skip(skip).limit(limit);
+  switch (req.user.role) {
+    case adminRole.admin:
+      break;
+
+    case adminRole.printCustomServiceViewer:
+      filter.typeService = 'printing';
+      break;
+
+    case adminRole.marketingCustomServiceViewer:
+      filter.typeService = 'marketing';
+      break;
+
+    case adminRole.programmingCustomServiceViewer:
+      filter.typeService = 'design and programming';
+      break;
+
+    default:
+      throw CustomError.create(400, CustomServicesMessages.notShowAccessibility);
+  }
+
+  const customServices = await CustomServices.find(filter, { __v: false })
+    .skip(skip)
+    .limit(limit);
 
   const total = await CustomServices.countDocuments(filter);
 
-  if (req.user.role == userRole.admin || req.user.role == userRole.humanRelations) {
-    return res.status(200).json({
-      status: httpStatusText.SUCCESS,
-      data: {
-        customServices,
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit),
-        },
+  return res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: {
+      customServices,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-    });
-  }
-
-  throw CustomError.create(400, CustomServicesMessages.justHrAndAdmin);
+    },
+  });
 });
 
 const getOneCustomServices = asyncWrapper(async (req, res) => {
@@ -87,18 +105,14 @@ const getOneCustomServices = asyncWrapper(async (req, res) => {
 
   const customServices = await CustomServices.findById(id, { __v: false });
 
-  if (req.user.role == userRole.admin || req.user.role == userRole.humanRelations) {
-    return res.status(200).json({
-      status: httpStatusText.SUCCESS,
-      data: customServices ? { customServices } : null,
-    });
-  }
-
-  throw CustomError.create(400, CustomServicesMessages.justHrAndAdmin);
+  return res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: customServices ? { customServices } : null,
+  });
 });
 
 const deleteOneCustomServices = asyncWrapper(async (req, res) => {
-  if (req.user.role !== userRole.admin) {
+  if (req.user.role !== adminRole.admin) {
     throw CustomError.create(400, CustomServicesMessages.notDeleteAccessibility);
   }
 
@@ -121,7 +135,7 @@ const deleteOneCustomServices = asyncWrapper(async (req, res) => {
   });
 });
 
-module.exports = {
+export default {
   addOneCustomServices,
   getAllCustomServices,
   getOneCustomServices,

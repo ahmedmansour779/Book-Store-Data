@@ -1,5 +1,8 @@
-const express = require('express');
-const multer = require('multer');
+import express from 'express';
+import multer from 'multer';
+import adminsController from '../controllers/admins.controller.js';
+import verifyToken from '../middlewares/verify.token.js';
+
 const {
   adminRegister,
   adminLogin,
@@ -12,8 +15,8 @@ const {
   deleteOneAdmin,
   changeRoleAdmin,
   updateAdminData,
-} = require('../controllers/admins.controller');
-const verifyToken = require('../middlewares/verify.token');
+  toggleAdminBlock,
+} = adminsController;
 
 const router = express.Router();
 const upload = multer();
@@ -27,6 +30,7 @@ router.post('/forgot-password', adminForgotPassword);
 router.post('/verify-otp', verifyOTP);
 router.post('/reset-password-admin', verifyToken, resetPasswordAdmin);
 router.patch('/update-profile', verifyToken, updateAdminData);
+router.patch('/block/:id', verifyToken, toggleAdminBlock);
 router.get('/', verifyToken, getAllAdmins);
 router
   .route('/:id')
@@ -34,4 +38,4 @@ router
   .patch(verifyToken, changeRoleAdmin)
   .delete(verifyToken, deleteOneAdmin);
 
-module.exports = router;
+export default router;

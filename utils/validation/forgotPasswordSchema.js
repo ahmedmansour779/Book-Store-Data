@@ -1,4 +1,4 @@
-const yup = require('yup');
+import yup from 'yup';
 
 const messages = {
   required: 'هذا الحقل مطلوب',
@@ -9,4 +9,4 @@ const forgotPasswordSchema = yup.object().shape({
   email: yup.string().email(messages.email).required(messages.required),
 });
 
-module.exports = forgotPasswordSchema;
+export default forgotPasswordSchema;

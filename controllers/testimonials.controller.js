@@ -1,11 +1,11 @@
-const { validationResult } = require('express-validator');
-const asyncWrapper = require('../middlewares/async.wrapper');
-const CustomError = require('../utils/custom.error');
-const userRole = require('../utils/user.roles');
-const Testimonials = require('../models/testimonials.model');
-const httpStatusText = require('../utils/http.status.text');
-const { default: mongoose } = require('mongoose');
-const { testimonialsMessages } = require('../constants');
+import { validationResult } from 'express-validator';
+import asyncWrapper from '../middlewares/async.wrapper.js';
+import CustomError from '../utils/errors/custom.error.js';
+import userRole from '../utils/constants/admin.roles.js';
+import Testimonials from '../models/testimonials.model.js';
+import * as httpStatusText from '../utils/constants/http.status.text.js';
+import mongoose from 'mongoose';
+import { testimonialsMessages } from '../constants/index.js';
 
 const addOneTestimonials = asyncWrapper(async (req, res) => {
   const errors = validationResult(req);
@@ -135,7 +135,7 @@ const deleteOneTestimonial = asyncWrapper(async (req, res) => {
   });
 });
 
-module.exports = {
+export default {
   addOneTestimonials,
   getAllTestimonials,
   getOneTestimonial,

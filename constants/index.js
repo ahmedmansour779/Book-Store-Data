@@ -37,6 +37,9 @@ const adminMessages = {
   resetPasswordSuccess: 'تم تغير كلمة المرور بنجاح يمكنك تسجيل الدخول',
   resetPasswordFail: 'البريد الالكتروني او المعرف غير صحيح',
   changeRoleSuccess: 'تم تغير الدور بنجاح',
+  notAuthorized: 'غير مصرح لك بتنفيذ هذا الإجراء',
+  adminUnblocked: 'تم رفع الحظر عن المسؤول بنجاح',
+  adminBlocked: 'تم حظر المسؤول بنجاح',
 };
 
 const blogsMessages = {
@@ -108,6 +111,8 @@ const userMessages = {
   deleteSuccess: 'تم حذف الحساب بنجاح',
   typeServiceRequired: 'نوع الخدمة مطلوب',
   serviceDetailsRequired: 'تفاصيل الخدمة مطلوبة',
+  userUnblocked: 'تم رفع الحظر عن المستخدم بنجاح',
+  userBlocked: 'تم حظر المستخدم بنجاح',
 };
 
 const termsMessages = {
@@ -138,9 +143,11 @@ const StandardServiceMessages = {
 const CustomServicesMessages = {
   ...globalMessages,
   justHrAndAdmin: 'فقط موظف العلاقات العامة والمشرف فقط يمكنهم الحصول علي هذة البيانات',
+  serviceTypeExist: 'نوع الخدمه موجود بالفعل',
 };
 
-module.exports = {
+export {
+  globalMessages,
   adminMessages,
   blogsMessages,
   jobsMessages,

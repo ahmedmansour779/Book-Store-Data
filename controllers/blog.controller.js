@@ -1,12 +1,12 @@
-const mongoose = require('mongoose');
-const { validationResult } = require('express-validator');
-const Blogs = require('../models/blog.model');
-const httpStatusText = require('../utils/http.status.text');
-const asyncWrapper = require('../middlewares/async.wrapper');
-const CustomError = require('../utils/custom.error');
-const formatDate = require('../utils/format.date');
-const userRole = require('../utils/user.roles');
-const { blogsMessages } = require('../constants');
+import mongoose from 'mongoose';
+import { validationResult } from 'express-validator';
+import Blogs from '../models/blog.model.js';
+import * as httpStatusText from '../utils/constants/http.status.text.js';
+import asyncWrapper from '../middlewares/async.wrapper.js';
+import CustomError from '../utils/errors/custom.error.js';
+import formatDate from '../utils/common/format.date.js';
+import userRole from '../utils/constants/admin.roles.js';
+import { blogsMessages } from '../constants/index.js';
 
 const addOneBlog = asyncWrapper(async (req, res) => {
   if (req.user.role !== userRole.writer) {
@@ -132,7 +132,7 @@ const updateBlog = asyncWrapper(async (req, res) => {
   });
 });
 
-module.exports = {
+export default {
   getAllBlogs,
   getOneBlog,
   addOneBlog,

@@ -1,15 +1,10 @@
-let express = require('express');
-const multer = require('multer');
-const verifyToken = require('../middlewares/verify.token');
-const {
-  addOneJob,
-  getAllJobs,
-  getOneJob,
-  deleteOneJob,
-  updateJob,
-  applyToJob,
-  getAllJobsForSite,
-} = require('../controllers/job.controller');
+import express from 'express';
+import multer from 'multer';
+import verifyToken from '../middlewares/verify.token.js';
+import jobController from '../controllers/job.controller.js';
+
+const { addOneJob, getAllJobs, getOneJob, deleteOneJob, updateJob, applyToJob, getAllJobsForSite } =
+  jobController;
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
@@ -26,4 +21,4 @@ router
   .delete(verifyToken, deleteOneJob)
   .patch(verifyToken, upload.none(), updateJob);
 
-module.exports = router;
+export default router;

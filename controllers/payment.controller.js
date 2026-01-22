@@ -1,5 +1,5 @@
-const generateSecureHash = require('../utils/generateSecureHash.js');
-const createPaymentIntentSchema = require('../utils/validation/PaymentIntentSchema.js');
+import generateSecureHash from '../utils/security/generateSecureHash.js';
+import createPaymentIntentSchema from '../utils/validation/PaymentIntentSchema.js';
 
 const createPaymentIntent = async (req, res) => {
   try {
@@ -41,4 +41,4 @@ const createPaymentIntent = async (req, res) => {
   }
 };
 
-module.exports = { createPaymentIntent };
+export default { createPaymentIntent };

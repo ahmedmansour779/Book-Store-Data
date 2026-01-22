@@ -1,17 +1,17 @@
-const { validationResult } = require('express-validator');
-const CustomError = require('../utils/custom.error');
-const Users = require('../models/user.model');
-const httpStatusText = require('../utils/http.status.text');
-const asyncWrapper = require('../middlewares/async.wrapper');
-const bcryptjs = require('bcryptjs');
-const generateToken = require('../utils/generate.token');
-const { sendOTP } = require('../utils/sendOTP');
-const OTP = require('../models/otp.model');
-const { default: mongoose } = require('mongoose');
-const userRole = require('../utils/user.roles');
-const { userMessages } = require('../constants');
-const { passwordSchema } = require('../utils/validation/registerAdminSchema');
-const AppError = require('../utils/app.error');
+import { validationResult } from 'express-validator';
+import CustomError from '../utils/errors/custom.error.js';
+import Users from '../models/user.model.js';
+import * as httpStatusText from '../utils/constants/http.status.text.js';
+import asyncWrapper from '../middlewares/async.wrapper.js';
+import bcryptjs from 'bcryptjs';
+import generateToken from '../utils/security/generate.token.js';
+import { sendOTP } from '../utils/security/sendOTP.js';
+import OTP from '../models/otp.model.js';
+import mongoose from 'mongoose';
+import userRole from '../utils/constants/admin.roles.js';
+import { userMessages, adminMessages } from '../constants/index.js';
+import { passwordSchema } from '../utils/validation/registerAdminSchema.js';
+import AppError from '../utils/errors/app.error.js';
 
 const register = asyncWrapper(async (req, res) => {
   const errors = validationResult(req);
@@ -20,6 +20,7 @@ const register = asyncWrapper(async (req, res) => {
   }
 
   const { name, phone, whatsapp, favoriteContact, companyName, email, password } = req.body;
+  const user = { name, phone, whatsapp, favoriteContact, companyName, email, password };
 
   const oldUser = await Users.findOne({ email });
 
@@ -27,17 +28,50 @@ const register = asyncWrapper(async (req, res) => {
     throw CustomError.create(400, userMessages.emailExists);
   }
 
-  const hashingPassword = await bcryptjs.hash(password, 10);
+  const otp = await sendOTP(email);
 
-  const user = await Users.create({
+  await OTP.create({
     email,
-    name,
-    phone,
-    whatsapp,
-    favoriteContact,
-    companyName,
-    password: hashingPassword,
+    otp,
+    expiresAt: Date.now() + 10 * 60 * 1000, // بعد 10 دقايق
   });
+
+  const token = await generateToken(user, '24h');
+  return res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: userMessages.otpSent,
+    data: token,
+  });
+});
+
+const verifyUser = asyncWrapper(async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    throw CustomError.create(400, userMessages.missingData);
+  }
+
+  const otpRecord = await OTP.findOne({
+    email,
+    expiresAt: { $gt: Date.now() },
+  }).sort({ createdAt: -1 });
+
+  if (!otpRecord) {
+    throw CustomError.create(400, userMessages.otpExpired);
+  }
+
+  if (otpRecord.otp !== otp) {
+    throw CustomError.create(400, userMessages.invalidOTP);
+  }
+  await OTP.deleteOne({ _id: otpRecord._id });
+
+  const oldUser = await Users.findOne({ email });
+
+  if (oldUser) {
+    throw CustomError.create(400, userMessages.emailExists);
+  }
+
+  const user = await Users.create(req.user);
 
   res.status(201).json({
     status: httpStatusText.SUCCESS,
@@ -62,6 +96,10 @@ const login = asyncWrapper(async (req, res) => {
   const matchPassword = await bcryptjs.compare(password, user.password);
   if (!matchPassword) {
     throw CustomError.create(400, userMessages.invalidPassword);
+  }
+
+  if (user.block) {
+    throw CustomError.create(400, adminMessages.notAuthorized);
   }
 
   const token = await generateToken(user, '24h');
@@ -158,6 +196,31 @@ const resetPassword = asyncWrapper(async (req, res, next) => {
   return res.status(400).json({
     status: httpStatusText.FAIL,
     message: userMessages.resetPasswordFail,
+  });
+});
+
+const toggleUserBlock = asyncWrapper(async (req, res) => {
+  if (req.user.role !== userRole.admin) {
+    throw CustomError.create(400, adminMessages.notAuthorized);
+  }
+  const id = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw CustomError.create(400, userMessages.invalidId);
+  }
+  const result = await Users.findById(id);
+
+  if (!result) {
+    throw CustomError.create(404, userMessages.adminNotFound);
+  }
+
+  result.block = !result.block;
+
+  await result.save();
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: { block: result.block },
+    message: result.block ? userMessages.userBlocked : userMessages.userUnblocked,
   });
 });
 
@@ -285,7 +348,7 @@ const deleteOneUser = asyncWrapper(async (req, res) => {
   });
 });
 
-module.exports = {
+export default {
   register,
   login,
   forgotPassword,
@@ -295,4 +358,6 @@ module.exports = {
   getOneUser,
   editProfileData,
   deleteOneUser,
+  toggleUserBlock,
+  verifyUser,
 };

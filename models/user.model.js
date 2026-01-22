@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const favoriteContact = require('../utils/favorite.contact');
-const { userMessages } = require('../constants');
+import mongoose from 'mongoose';
+import validator from 'validator';
+import favoriteContact from '../utils/constants/favorite.contact.js';
+import { userMessages } from '../constants/index.js';
 
 const userSchema = new mongoose.Schema(
   {
@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema(
         message: userMessages.emailInvalid,
       },
     },
+    block: {
+      type: Boolean,
+      default: false,
+    },
     password: {
       type: String,
       required: [true, userMessages.passwordRequired],
@@ -54,4 +58,4 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('User', userSchema);
+export default mongoose.model('User', userSchema);

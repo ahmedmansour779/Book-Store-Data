@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { blogsMessages } = require('../constants');
+import mongoose from 'mongoose';
+import { blogsMessages } from '../constants/index.js';
 
 const blogSchema = new mongoose.Schema(
   {
@@ -35,4 +35,4 @@ const blogSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('Blog', blogSchema);
+export default mongoose.model('Blog', blogSchema);

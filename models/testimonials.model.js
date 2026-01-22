@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { testimonialsMessages } = require('../constants');
+import mongoose from 'mongoose';
+import { testimonialsMessages } from '../constants/index.js';
 
 const ratingSchema = new mongoose.Schema(
   {
@@ -31,4 +31,4 @@ const ratingSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('rating', ratingSchema);
+export default mongoose.model('rating', ratingSchema);

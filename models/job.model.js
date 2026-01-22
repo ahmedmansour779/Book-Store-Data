@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { jobsMessages } = require('../constants');
+import mongoose from 'mongoose';
+import { jobsMessages } from '../constants/index.js';
 
 const applicationSchema = new mongoose.Schema(
   {
@@ -84,4 +84,4 @@ const jobSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('Job', jobSchema);
+export default mongoose.model('Job', jobSchema);

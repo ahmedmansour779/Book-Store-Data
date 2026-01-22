@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { admin, humanRelations, writer } = require('../utils/user.roles');
+import mongoose from 'mongoose';
+import roles from '../utils/constants/admin.roles.js';
 
 const adminSchema = new mongoose.Schema({
   name: {
@@ -23,13 +23,24 @@ const adminSchema = new mongoose.Schema({
     required: true,
   },
 
+  block: {
+    type: Boolean,
+    default: false,
+  },
+
+  country: {
+    type: String,
+    required: true,
+    enum: ['egypt', 'Saudi Arabia'],
+  },
+
   role: {
     type: String,
     required: true,
-    enum: [admin, humanRelations, writer],
+    enum: Object.values(roles),
   },
 });
 
 const Admin = mongoose.model('Admin', adminSchema);
 
-module.exports = Admin;
+export default Admin;

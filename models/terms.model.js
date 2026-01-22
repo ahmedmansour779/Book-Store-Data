@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { termsMessages } = require('../constants');
+import mongoose from 'mongoose';
+import { termsMessages } from '../constants/index.js';
 
 const termsSchema = new mongoose.Schema(
   {
@@ -17,4 +17,4 @@ const termsSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('Term', termsSchema);
+export default mongoose.model('Term', termsSchema);

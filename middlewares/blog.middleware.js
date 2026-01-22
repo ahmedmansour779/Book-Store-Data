@@ -1,4 +1,4 @@
-const { body } = require('express-validator');
+import { body } from 'express-validator';
 
 const middlewarePostBlog = () => {
   return [
@@ -39,4 +39,4 @@ const middlewarePostBlog = () => {
   ];
 };
 
-module.exports = { middlewarePostBlog };
+export { middlewarePostBlog };

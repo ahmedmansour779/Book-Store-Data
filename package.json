@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js",
+    "dev": "node --watch index.js",
     "start": "node index.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -15,7 +16,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "engines": {
     "node": ">=18"
   },
@@ -28,6 +28,7 @@
     "express-validator": "^7.3.0",
     "geoip-lite": "^1.4.10",
     "jsonwebtoken": "^9.0.2",
+    "mailtrap": "^4.4.0",
     "mongoose": "^9.0.0",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.11",
@@ -40,7 +41,6 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.5.0",
-    "nodemon": "^3.1.11",
     "prettier": "^3.7.4"
   }
 }

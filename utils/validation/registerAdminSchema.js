@@ -1,4 +1,4 @@
-const yup = require('yup');
+import yup from 'yup';
 
 const adminSchema = yup.object().shape({
   name: yup.string().required('الاسم مطلوب'),
@@ -20,4 +20,4 @@ const passwordSchema = yup.object({
     .min(8, 'يجب أن تكون كلمة المرور 8 أحرف على الأقل'),
 });
 
-module.exports = { adminSchema, passwordSchema };
+export { adminSchema, passwordSchema };

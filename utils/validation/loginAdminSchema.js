@@ -1,4 +1,4 @@
-const yup = require('yup');
+import yup from 'yup';
 
 const messages = {
   required: 'هذا الحقل مطلوب',
@@ -11,4 +11,4 @@ const loginSchema = yup.object().shape({
   password: yup.string().required(messages.required),
 });
 
-module.exports = loginSchema;
+export default loginSchema;

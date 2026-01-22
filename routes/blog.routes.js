@@ -1,14 +1,10 @@
-let express = require('express');
-const {
-  addOneBlog,
-  getAllBlogs,
-  getOneBlog,
-  deleteOneBlog,
-  updateBlog,
-} = require('../controllers/blog.controller');
-const multer = require('multer');
-const validateImage = require('../middlewares/validate.Image');
-const verifyToken = require('../middlewares/verify.token');
+import express from 'express';
+import blogController from '../controllers/blog.controller.js';
+import multer from 'multer';
+import validateImage from '../middlewares/validate.Image.js';
+import verifyToken from '../middlewares/verify.token.js';
+
+const { addOneBlog, getAllBlogs, getOneBlog, deleteOneBlog, updateBlog } = blogController;
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
@@ -23,4 +19,4 @@ router
   .delete(verifyToken, deleteOneBlog)
   .patch(verifyToken, upload.none(), validateImage, updateBlog);
 
-module.exports = router;
+export default router;

@@ -1,13 +1,9 @@
-let express = require('express');
-const multer = require('multer');
-const verifyToken = require('../middlewares/verify.token');
-const {
-  addOneTerm,
-  getAllTerms,
-  getOneTerm,
-  updateTerm,
-  deleteOneTerm,
-} = require('../controllers/term.controller');
+import express from 'express';
+import multer from 'multer';
+import verifyToken from '../middlewares/verify.token.js';
+import termController from '../controllers/term.controller.js';
+
+const { addOneTerm, getAllTerms, getOneTerm, updateTerm, deleteOneTerm } = termController;
 
 const upload = multer();
 
@@ -21,4 +17,4 @@ router
   .patch(upload.none(), verifyToken, updateTerm)
   .delete(verifyToken, deleteOneTerm);
 
-module.exports = router;
+export default router;

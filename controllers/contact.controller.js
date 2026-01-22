@@ -1,11 +1,11 @@
-const { validationResult } = require('express-validator');
-const CustomError = require('../utils/custom.error');
-const Contact = require('../models/contact.model');
-const asyncWrapper = require('../middlewares/async.wrapper');
-const httpStatusText = require('../utils/http.status.text');
-const { default: mongoose } = require('mongoose');
-const userRole = require('../utils/user.roles');
-const { contactMessages } = require('../constants');
+import { validationResult } from 'express-validator';
+import CustomError from '../utils/errors/custom.error.js';
+import Contact from '../models/contact.model.js';
+import asyncWrapper from '../middlewares/async.wrapper.js';
+import * as httpStatusText from '../utils/constants/http.status.text.js';
+import mongoose from 'mongoose';
+import userRole from '../utils/constants/admin.roles.js';
+import { contactMessages } from '../constants/index.js';
 
 const addOneContact = asyncWrapper(async (req, res) => {
   const errors = validationResult(req);
@@ -95,7 +95,7 @@ const deleteOneContact = asyncWrapper(async (req, res) => {
   });
 });
 
-module.exports = {
+export default {
   addOneContact,
   getAllContact,
   getOneContact,

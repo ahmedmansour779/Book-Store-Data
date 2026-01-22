@@ -1,14 +1,16 @@
-let express = require('express');
-const multer = require('multer');
-const validateImage = require('../middlewares/validate.Image');
-const verifyToken = require('../middlewares/verify.token');
+import express from 'express';
+import multer from 'multer';
+import validateImage from '../middlewares/validate.Image.js';
+import verifyToken from '../middlewares/verify.token.js';
+import testimonialsController from '../controllers/testimonials.controller.js';
+
 const {
   addOneTestimonials,
   getAllTestimonials,
   getOneTestimonial,
   updateTestimonial,
   deleteOneTestimonial,
-} = require('../controllers/testimonials.controller');
+} = testimonialsController;
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
@@ -23,4 +25,4 @@ router
   .patch(verifyToken, upload.single('image'), validateImage, updateTestimonial)
   .delete(verifyToken, deleteOneTestimonial);
 
-module.exports = router;
+export default router;

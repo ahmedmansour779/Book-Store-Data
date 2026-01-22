@@ -1,4 +1,4 @@
-const yup = require('yup');
+import yup from 'yup'
 
 const messages = {
   required: 'هذا الحقل مطلوب',
@@ -12,4 +12,4 @@ const verifyOTPSchema = yup.object().shape({
   otp: yup.string().required(messages.required).length(6, messages.otpLength),
 });
 
-module.exports = verifyOTPSchema;
+export default verifyOTPSchema;

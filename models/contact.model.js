@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const { userMessages } = require('../constants');
+import mongoose from 'mongoose';
+import validator from 'validator';
+import { userMessages } from '../constants/index.js';
 
 const contactSchema = new mongoose.Schema({
   name: {
@@ -39,4 +39,4 @@ const contactSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Contact', contactSchema);
+export default mongoose.model('Contact', contactSchema);

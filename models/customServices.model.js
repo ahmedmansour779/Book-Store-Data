@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const favoriteContact = require('../utils/favorite.contact');
-const { userMessages } = require('../constants');
+import mongoose from 'mongoose';
+import validator from 'validator';
+import favoriteContact from '../utils/constants/favorite.contact.js';
+import { userMessages } from '../constants/index.js';
 
 const customServicesSchema = new mongoose.Schema(
   {
@@ -64,4 +64,4 @@ const customServicesSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('customServices', customServicesSchema);
+export default mongoose.model('customServices', customServicesSchema);

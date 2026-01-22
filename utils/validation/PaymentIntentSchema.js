@@ -1,4 +1,4 @@
-const yup = require('yup');
+import yup from 'yup';
 
 const createPaymentIntentSchema = yup.object().shape({
   MerchantId: yup
@@ -92,4 +92,4 @@ const createPaymentIntentSchema = yup.object().shape({
   Token: yup.string().max(200, 'Token must not exceed 200 characters').optional(),
 });
 
-module.exports = createPaymentIntentSchema;
+export default createPaymentIntentSchema;

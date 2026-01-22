@@ -1,22 +1,22 @@
-const asyncWrapper = require('../middlewares/async.wrapper');
-const httpStatusText = require('../utils/http.status.text');
-const Admin = require('../models/admin.model');
-const bcryptjs = require('bcryptjs');
-const generateToken = require('../utils/generate.token');
-const { adminSchema, passwordSchema } = require('../utils/validation/registerAdminSchema');
-const loginSchema = require('../utils/validation/loginAdminSchema');
-const forgotPasswordSchema = require('../utils/validation/forgotPasswordSchema');
-const verifyOTPSchema = require('../utils/validation/verifyOTPSchema');
-const AppError = require('../utils/app.error');
-const { adminMessages } = require('../constants/index');
-const OTP = require('../models/otp.model');
-const { sendOTP } = require('../utils/sendOTP');
-const userRole = require('../utils/user.roles');
-const CustomError = require('../utils/custom.error');
-const { default: mongoose } = require('mongoose');
+import asyncWrapper from '../middlewares/async.wrapper.js';
+import * as httpStatusText from '../utils/constants/http.status.text.js';
+import Admin from '../models/admin.model.js';
+import bcryptjs from 'bcryptjs';
+import generateToken from '../utils/security/generate.token.js';
+import { adminSchema, passwordSchema } from '../utils/validation/registerAdminSchema.js';
+import loginSchema from '../utils/validation/loginAdminSchema.js';
+import forgotPasswordSchema from '../utils/validation/forgotPasswordSchema.js';
+import verifyOTPSchema from '../utils/validation/verifyOTPSchema.js';
+import AppError from '../utils/errors/app.error.js';
+import { adminMessages } from '../constants/index.js';
+import OTP from '../models/otp.model.js';
+import { sendOTP } from '../utils/security/sendOTP.js';
+import adminRole from '../utils/constants/admin.roles.js';
+import CustomError from '../utils/errors/custom.error.js';
+import mongoose from 'mongoose';
 
 const getAllAdmins = asyncWrapper(async (req, res) => {
-  if (req.user.role !== userRole.admin) {
+  if (req.user.role !== adminRole.admin) {
     throw CustomError.create(400, adminMessages.notShowAccessibility);
   }
 
@@ -46,7 +46,7 @@ const getAllAdmins = asyncWrapper(async (req, res) => {
 });
 
 const getOneAdmin = asyncWrapper(async (req, res, next) => {
-  if (req.user.role !== userRole.admin) {
+  if (req.user.role !== adminRole.admin) {
     throw CustomError.create(400, adminMessages.notShowAccessibility);
   }
   const id = req.params.id;
@@ -65,7 +65,7 @@ const getOneAdmin = asyncWrapper(async (req, res, next) => {
 });
 
 const deleteOneAdmin = asyncWrapper(async (req, res) => {
-  if (req.user.role !== userRole.admin) {
+  if (req.user.role !== adminRole.admin) {
     throw CustomError.create(400, adminMessages.notDeleteAccessibility);
   }
   const id = req.params.id;
@@ -88,7 +88,7 @@ const deleteOneAdmin = asyncWrapper(async (req, res) => {
 });
 
 const changeRoleAdmin = asyncWrapper(async (req, res) => {
-  if (req.user.role !== userRole.admin) {
+  if (req.user.role !== adminRole.admin) {
     throw CustomError.create(400, adminMessages.notEditAccessibility);
   }
 
@@ -137,6 +137,31 @@ const updateAdminData = asyncWrapper(async (req, res) => {
   });
 });
 
+const toggleAdminBlock = asyncWrapper(async (req, res) => {
+  if (req.user.role !== adminRole.admin) {
+    throw CustomError.create(400, adminMessages.notAuthorized);
+  }
+  const id = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw CustomError.create(400, adminMessages.invalidId);
+  }
+  const result = await Admin.findById(id);
+
+  if (!result) {
+    throw CustomError.create(404, adminMessages.adminNotFound);
+  }
+
+  result.block = !result.block;
+
+  await result.save();
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: { block: result.block },
+    message: result.block ? adminMessages.adminBlocked : adminMessages.adminUnblocked,
+  });
+});
+
 const getAdminData = asyncWrapper(async (req, res, next) => {
   const admin = await Admin.findById(req.user.id).select('-password -__v');
 
@@ -152,7 +177,7 @@ const getAdminData = asyncWrapper(async (req, res, next) => {
 });
 
 const adminRegister = asyncWrapper(async (req, res, next) => {
-  const { name, phone, email, password, role } = req.body;
+  const { name, phone, email, password, role, country } = req.body;
 
   try {
     await adminSchema.validate({ name, phone, email, password, role }, { abortEarly: false });
@@ -173,6 +198,7 @@ const adminRegister = asyncWrapper(async (req, res, next) => {
     phone,
     email,
     role,
+    country,
     password: hashingPassword,
   });
 
@@ -208,6 +234,10 @@ const adminLogin = asyncWrapper(async (req, res, next) => {
   const isPasswordValid = await bcryptjs.compare(password, admin.password);
   if (!isPasswordValid) {
     return next(new AppError(adminMessages.invalidCredentials, 401, httpStatusText.FAIL));
+  }
+
+  if (admin.block) {
+    return next(new AppError(adminMessages.notAuthorized, 401, httpStatusText.FAIL));
   }
 
   const payload = {
@@ -331,7 +361,7 @@ const resetPasswordAdmin = asyncWrapper(async (req, res, next) => {
   });
 });
 
-module.exports = {
+export default {
   adminRegister,
   adminLogin,
   getAdminData,
@@ -343,4 +373,5 @@ module.exports = {
   deleteOneAdmin,
   changeRoleAdmin,
   updateAdminData,
+  toggleAdminBlock,
 };

@@ -1,14 +1,11 @@
-/* eslint-disable no-unused-vars */
-const { validationResult } = require('express-validator');
-const asyncWrapper = require('../middlewares/async.wrapper');
-const CustomError = require('../utils/custom.error');
-const userRole = require('../utils/user.roles');
-const uploadImage = require('../utils/upload.Image');
-const Portfolio = require('../models/portfolio.model');
-const httpStatusText = require('../utils/http.status.text');
-const { default: mongoose } = require('mongoose');
-const deleteImage = require('../utils/delete.image');
-const { portfolioMessages } = require('../constants');
+import { validationResult } from 'express-validator';
+import mongoose from 'mongoose';
+import { portfolioMessages } from '../constants/index.js';
+import asyncWrapper from '../middlewares/async.wrapper.js';
+import Portfolio from '../models/portfolio.model.js';
+import adminRole from '../utils/constants/admin.roles.js';
+import * as httpStatusText from '../utils/constants/http.status.text.js';
+import CustomError from '../utils/errors/custom.error.js';
 
 const addOnePortfolio = asyncWrapper(async (req, res) => {
   const errors = validationResult(req);
@@ -18,17 +15,18 @@ const addOnePortfolio = asyncWrapper(async (req, res) => {
 
   const { title, image, url, category } = req.body;
 
-  if (req.user.role !== userRole.admin) {
+  if (req.user.role == adminRole.admin || req.user.role == adminRole.portfolioCreator) {
+    const portfolio = await Portfolio.create({ title, image, url, category });
+
+    res.status(201).json({
+      status: httpStatusText.SUCCESS,
+      data: { portfolio },
+      message: portfolioMessages.addSuccess,
+    });
+
     throw CustomError.create(400, portfolioMessages.notAddAccessibility);
   }
-
-  const portfolio = await Portfolio.create({ title, image, url, category });
-
-  res.status(201).json({
-    status: httpStatusText.SUCCESS,
-    data: { portfolio },
-    message: portfolioMessages.addSuccess,
-  });
+  throw CustomError.create(400, portfolioMessages.notAddAccessibility);
 });
 
 const getAllPortfolio = asyncWrapper(async (req, res) => {
@@ -96,35 +94,34 @@ const getOnePortfolio = asyncWrapper(async (req, res) => {
 });
 
 const updatePortfolio = asyncWrapper(async (req, res) => {
-  if (req.user.role !== userRole.admin) {
-    throw CustomError.create(400, portfolioMessages.notEditAccessibility);
-  }
+  if (req.user.role == adminRole.admin || req.user.role == adminRole.portfolioCreator) {
+    const { id } = req.params;
 
-  const { id } = req.params;
-
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    throw CustomError.create(400, errors.errors[0].msg);
-  }
-
-  const portfolio = await Portfolio.findById(id);
-  if (!portfolio) {
-    throw CustomError.create(404, portfolioMessages.notFound);
-  }
-
-  Object.keys(req.body).forEach((key) => {
-    if (req.body[key] !== '') {
-      portfolio[key] = req.body[key];
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      throw CustomError.create(400, errors.errors[0].msg);
     }
-  });
 
-  await portfolio.save();
+    const portfolio = await Portfolio.findById(id);
+    if (!portfolio) {
+      throw CustomError.create(404, portfolioMessages.notFound);
+    }
 
-  res.status(200).json({
-    status: httpStatusText.SUCCESS,
-    data: { portfolio },
-    message: portfolioMessages.editSuccess,
-  });
+    Object.keys(req.body).forEach((key) => {
+      if (req.body[key] !== '') {
+        portfolio[key] = req.body[key];
+      }
+    });
+
+    await portfolio.save();
+
+    res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { portfolio },
+      message: portfolioMessages.editSuccess,
+    });
+  }
+  throw CustomError.create(400, portfolioMessages.notEditAccessibility);
 });
 
 const deleteOnePortfolio = asyncWrapper(async (req, res) => {
@@ -136,19 +133,6 @@ const deleteOnePortfolio = asyncWrapper(async (req, res) => {
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     throw CustomError.create(400, portfolioMessages.invalidId);
-  }
-
-  const portfolio = await Portfolio.findById(id);
-  if (!portfolio) {
-    throw CustomError.create(404, portfolioMessages.notFound);
-  }
-
-  if (portfolio.image) {
-    try {
-      await deleteImage(portfolio.image);
-    } catch (error) {
-      throw CustomError.create(400, portfolioMessages.errorDeletingImage);
-    }
   }
 
   const result = await Portfolio.deleteOne({ _id: id });
@@ -164,7 +148,7 @@ const deleteOnePortfolio = asyncWrapper(async (req, res) => {
   });
 });
 
-module.exports = {
+export default {
   addOnePortfolio,
   getAllPortfolio,
   getOnePortfolio,

@@ -1,4 +1,8 @@
-const express = require('express');
+import express from 'express';
+import userController from '../controllers/user.controller.js';
+import multer from 'multer';
+import verifyToken from '../middlewares/verify.token.js';
+
 const {
   register,
   login,
@@ -9,9 +13,9 @@ const {
   getAllUser,
   deleteOneUser,
   resetPassword,
-} = require('../controllers/user.controller');
-const multer = require('multer');
-const verifyToken = require('../middlewares/verify.token');
+  toggleUserBlock,
+  verifyUser,
+} = userController;
 
 const router = express.Router();
 const upload = multer();
@@ -22,8 +26,10 @@ router.route('/register').post(register);
 router.route('/login').post(login);
 router.route('/forgotPassword').post(forgotPassword);
 router.route('/verifyOTP').post(verifyOTP);
+router.route('/verify-user').post(verifyToken, verifyUser);
 router.route('/reset-password').post(verifyToken, resetPassword);
+router.route('/block/:id').patch(verifyToken, toggleUserBlock);
 router.route('/').get(verifyToken, getAllUser).patch(verifyToken, editProfileData);
 router.route('/:id').get(verifyToken, getOneUser).delete(verifyToken, deleteOneUser);
 
-module.exports = router;
+export default router;

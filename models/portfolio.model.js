@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const { designProgramming, marketing, print } = require('../utils/portfolio.category');
-const { testimonialsMessages } = require('../constants');
+import mongoose from 'mongoose';
+import portfolioCategory from '../utils/constants/portfolio.category.js';
+import { testimonialsMessages } from '../constants/index.js';
 
 const PortfolioSchema = new mongoose.Schema(
   {
@@ -19,7 +19,11 @@ const PortfolioSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, testimonialsMessages.categoryIsRequire],
-      enum: [designProgramming, marketing, print],
+      enum: [
+        portfolioCategory.designProgramming,
+        portfolioCategory.marketing,
+        portfolioCategory.print,
+      ],
     },
   },
   {
@@ -27,4 +31,4 @@ const PortfolioSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('Portfolio', PortfolioSchema);
+export default mongoose.model('Portfolio', PortfolioSchema);
